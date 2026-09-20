@@ -1,0 +1,1593 @@
+<!doctype html><html lang='uk'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>Трейдинг-журнал v1.2</title>
+<style>
+:root{--bg:#0b0f14;--card:#121821;--muted:#8793a1;--text:#eef3f8;--line:#222c38;--good:#2ecc71;--bad:#ff5c5c;--accent:#4c8dff}*{box-sizing:border-box}body{margin:0;font:14px Inter,system-ui,Arial;background:var(--bg);color:var(--text)}header{position:sticky;top:0;background:#0b0f14e8;backdrop-filter:blur(10px);border-bottom:1px solid var(--line);z-index:5}.wrap{max-width:1250px;margin:auto;padding:18px}.top{display:flex;align-items:center;justify-content:space-between;gap:12px}.brand{font-weight:800;font-size:19px}.tabs{display:flex;gap:8px;flex-wrap:wrap}.tabs button,.btn{border:1px solid var(--line);background:var(--card);color:var(--text);padding:9px 12px;border-radius:10px;cursor:pointer}.tabs button.active,.btn.primary{background:var(--accent);border-color:var(--accent)}main{max-width:1250px;margin:auto;padding:22px}.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}.metric b{font-size:25px;display:block;margin-top:8px}.muted{color:var(--muted)}.good{color:var(--good)}.bad{color:var(--bad)}section{display:none}section.active{display:block}h2{margin:0 0 14px}.two{display:grid;grid-template-columns:1.4fr 1fr;gap:14px;margin-top:14px}table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:10px;border-bottom:1px solid var(--line);white-space:nowrap}th{color:var(--muted);font-weight:600}.tablewrap{overflow:auto}.bar{height:8px;background:#202a36;border-radius:9px;overflow:hidden}.bar i{display:block;height:100%;background:var(--accent)}
+.break-section{margin-bottom:24px}.break-title{color:var(--muted);font-size:14px;margin-bottom:10px}.break-item{padding:10px 12px;margin:7px 0;border:1px solid var(--line);border-radius:11px;background:#0e141c}.break-top{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:8px}.break-name{font-weight:700}.break-stats{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}.stat-chip{font-size:12px;padding:3px 7px;border-radius:999px;background:#192331;color:#cbd5e1}.stat-chip.good{background:rgba(44,190,120,.13);color:#58d99a}.stat-chip.bad{background:rgba(239,83,80,.13);color:#ff7774}.break-bar{height:9px;background:#202a36;border-radius:999px;overflow:hidden}.break-bar i{display:block;height:100%;border-radius:999px}.tone-blue i{background:linear-gradient(90deg,#3b82f6,#72a7ff)}.tone-violet i{background:linear-gradient(90deg,#8b5cf6,#c084fc)}.tone-green i{background:linear-gradient(90deg,#16a56a,#5bd69a)}.tone-orange i{background:linear-gradient(90deg,#f59e0b,#fbbf24)}form{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}label{display:grid;gap:6px;color:var(--muted)}input,select,textarea{width:100%;background:#0e141c;border:1px solid var(--line);color:var(--text);padding:10px;border-radius:9px}textarea{min-height:90px}.full{grid-column:1/-1}.actions{display:flex;gap:10px;align-items:end}.pill{display:inline-block;padding:3px 7px;border-radius:20px;background:#1c2530}.chart{height:260px;position:relative;margin-top:14px;padding:8px 8px 26px 48px}.chart-grid{position:absolute;left:48px;right:8px;top:8px;bottom:26px}.chart-grid-line{position:absolute;left:0;right:0;border-top:1px dashed #2b3745}.chart-y{position:absolute;left:0;top:8px;bottom:26px;width:42px;color:var(--muted);font-size:11px}.chart-y span{position:absolute;right:7px;transform:translateY(50%)}.chart-bars{position:absolute;left:48px;right:8px;top:8px;bottom:26px;display:flex;align-items:flex-end;gap:5px}.chart-col{flex:1;height:100%;position:relative;display:flex;align-items:flex-end;min-width:4px}.chart-bar{width:100%;min-height:3px;background:linear-gradient(180deg,#66a0ff 0%,var(--accent) 60%,#316fd5 100%);border-radius:7px 7px 2px 2px;box-shadow:0 4px 14px rgba(74,137,232,.16);transition:transform .15s,filter .15s;cursor:pointer}.chart-bar:hover{transform:translateY(-2px);filter:brightness(1.18)}.chart-zero{position:absolute;left:48px;right:8px;border-top:1px solid #66717f;opacity:.55}.chart-xlabel{position:absolute;right:8px;bottom:0;color:var(--muted);font-size:11px}.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.filters select{width:auto}.month-folder{margin-bottom:10px;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#0e141c}.month-head{width:100%;border:0;background:#151d27;color:var(--text);padding:13px 15px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;text-align:left}.month-head b{font-size:15px}.month-meta{color:var(--muted);font-size:12px}.month-body{display:none}.month-folder.open .month-body{display:block}.month-folder.open .month-arrow{transform:rotate(90deg)}.month-arrow{display:inline-block;transition:.15s;margin-right:8px}.month-table{border-radius:0;border:0;padding:0}
+.month-head{background:linear-gradient(90deg,#172231,#131c27)}
+.month-folder{box-shadow:0 8px 28px rgba(0,0,0,.12)}
+.month-table tbody tr{transition:background .15s,transform .15s}.month-table tbody tr:hover{background:#17212d}
+.trade-id{font-weight:750;color:#dce8f8}.date-cell{color:#c7d2df}.pair-badge,.session-badge,.side-badge,.model-badge,.result-badge{display:inline-flex;align-items:center;padding:4px 8px;border-radius:999px;font-size:12px;font-weight:700;border:1px solid transparent}
+.pair-badge{background:#182331;color:#cbd8e8;border-color:#27384b}.session-london{background:rgba(139,92,246,.14);color:#c9a7ff;border-color:rgba(139,92,246,.28)}.session-new-york{background:rgba(59,130,246,.14);color:#82b3ff;border-color:rgba(59,130,246,.28)}.session-asia{background:rgba(245,158,11,.14);color:#ffc75c;border-color:rgba(245,158,11,.28)}
+.side-long{background:rgba(34,197,94,.13);color:#62df8a;border-color:rgba(34,197,94,.26)}.side-short{background:rgba(249,115,22,.13);color:#ff9a5a;border-color:rgba(249,115,22,.26)}
+.model-ob{background:rgba(14,165,233,.13);color:#68c9f4}.model-fvg{background:rgba(168,85,247,.13);color:#d29bff}.model-stb-bts{background:rgba(236,72,153,.13);color:#ff91c6}.model-other{background:#1b2632;color:#cbd5e1}
+.result-tp{background:rgba(34,197,94,.14);color:#5ee58b;border-color:rgba(34,197,94,.28)}.result-sl{background:rgba(239,68,68,.14);color:#ff7777;border-color:rgba(239,68,68,.28)}.result-be{background:rgba(148,163,184,.13);color:#cbd5e1;border-color:rgba(148,163,184,.25)}
+.r-pos{color:#39d98a;font-weight:800}.r-neg{color:#ff6565;font-weight:800}.r-zero{color:#aab6c4;font-weight:800}.notes-cell{max-width:430px;overflow:hidden;text-overflow:ellipsis;color:#c5d0dc}.month-summary{display:flex;gap:7px;align-items:center;flex-wrap:wrap}.month-chip{padding:3px 7px;border-radius:999px;background:#202b39;color:#aebccc;font-size:11px}.month-chip.pos{background:rgba(34,197,94,.12);color:#58d99a}.month-chip.neg{background:rgba(239,68,68,.12);color:#ff7774}@media(max-width:850px){.grid{grid-template-columns:repeat(2,1fr)}.two,form{grid-template-columns:1fr}.full{grid-column:auto}}
+
+.trade-row{cursor:pointer}.trade-row:hover{background:#182433!important}.trade-id:after{content:'  ›';color:#64748b}
+.modal-backdrop{position:fixed;inset:0;background:rgba(3,8,14,.78);backdrop-filter:blur(5px);display:none;align-items:center;justify-content:center;padding:24px;z-index:1000}.modal-backdrop.open{display:flex}.trade-modal{width:min(1120px,96vw);max-height:92vh;overflow:auto;background:#101821;border:1px solid #2a394b;border-radius:18px;box-shadow:0 28px 90px rgba(0,0,0,.55)}.detail-head{position:sticky;top:0;z-index:2;background:rgba(16,24,33,.96);backdrop-filter:blur(10px);display:flex;justify-content:space-between;align-items:center;padding:18px 22px;border-bottom:1px solid var(--line)}.detail-title{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.detail-title h3{margin:0;font-size:22px}.close-modal{border:1px solid var(--line);background:#18222e;color:var(--text);width:36px;height:36px;border-radius:10px;cursor:pointer;font-size:20px}.detail-body{padding:22px}.detail-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.detail-box{background:#0c131b;border:1px solid var(--line);border-radius:12px;padding:12px}.detail-box span{display:block;color:var(--muted);font-size:12px;margin-bottom:5px}.detail-box b{font-size:15px}.detail-notes{margin-top:14px;background:#0c131b;border:1px solid var(--line);border-radius:12px;padding:15px;line-height:1.55}.shots{display:grid;grid-template-columns:repeat(2,minmax(0,440px));justify-content:center;gap:16px;margin-top:14px}.shot-frame{min-height:0;max-height:220px}.shot{background:#0c131b;border:1px solid var(--line);border-radius:14px;padding:12px;width:100%;box-sizing:border-box}.shot-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.shot-frame{aspect-ratio:16/7;border-radius:10px;overflow:hidden;background:#080d13;display:flex;align-items:center;justify-content:center;color:var(--muted)}.shot-frame img{width:100%;height:100%;object-fit:contain}.shot-link{color:#78aaff;text-decoration:none;font-size:12px}.empty-shot{padding:20px;text-align:center}.detail-links{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.detail-links a{color:#8db7ff;text-decoration:none;background:#152235;border:1px solid #294264;padding:7px 10px;border-radius:9px;font-size:12px}@media(max-width:800px){.detail-grid{grid-template-columns:repeat(2,1fr)}.shots{grid-template-columns:1fr}}
+
+.paste-zone{border:1.5px dashed #36506d;border-radius:14px;background:#0b131c;min-height:150px;display:flex;align-items:center;justify-content:center;text-align:center;padding:14px;cursor:pointer;transition:.15s;position:relative;overflow:hidden}.paste-zone:hover,.paste-zone.focus{border-color:#5792e8;background:#0e1925}.paste-zone img{max-width:100%;max-height:190px;object-fit:contain;border-radius:8px}.paste-hint b{display:block;margin-bottom:5px}.paste-hint span{color:var(--muted);font-size:12px}.paste-remove{position:absolute;top:8px;right:8px;border:1px solid #5a3030;background:#281517;color:#ff8585;border-radius:8px;padding:4px 8px;cursor:pointer;z-index:2}.shot-frame img{cursor:zoom-in}.image-lightbox{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:3000;display:none;align-items:center;justify-content:center;padding:24px}.image-lightbox.open{display:flex}.image-lightbox img{max-width:96vw;max-height:94vh;object-fit:contain;box-shadow:0 25px 90px #000;border-radius:8px;cursor:zoom-out}.lightbox-close{position:absolute;right:24px;top:20px;width:42px;height:42px;border-radius:50%;border:1px solid #415064;background:#111a24;color:#fff;font-size:25px;cursor:pointer}
+
+.month-folder{border:1px solid #263647!important;border-radius:14px!important;overflow:hidden;margin-bottom:9px!important;background:#101821;transition:transform .15s,border-color .15s,box-shadow .15s}.month-folder:hover{border-color:#36516d!important;box-shadow:0 10px 28px rgba(0,0,0,.16)}.month-folder.open{border-color:#397dcc!important;box-shadow:0 0 0 1px rgba(59,130,246,.08),0 12px 34px rgba(0,0,0,.18)}.month-head{min-height:52px!important;padding:0 14px!important;background:linear-gradient(90deg,#172333,#121d29)!important}.month-head:hover{background:linear-gradient(90deg,#1a2a3d,#152334)!important}.month-head>span:first-child{display:flex;align-items:center;gap:9px}.month-arrow{width:24px;height:24px;display:inline-flex!important;align-items:center;justify-content:center;border-radius:9px;background:#202e3e;color:#8fa4ba;font-size:20px;transition:.2s}.month-folder.open .month-arrow{transform:rotate(90deg);background:#173a63;color:#77b5ff}.month-head b{font-size:17px;letter-spacing:-.2px}.month-summary{gap:8px!important}.month-chip{font-size:11px!important;padding:4px 8px!important;border:1px solid #2a3a4d;background:#1a2736!important;color:#aebdcd!important}.month-chip.pos{border-color:rgba(45,201,126,.24);background:rgba(45,201,126,.12)!important;color:#58d99a!important}.month-chip.neg{border-color:rgba(239,83,80,.24);background:rgba(239,83,80,.12)!important;color:#ff7774!important}.month-folder.open .month-body{border-top:1px solid #263647}.month-folder:not(.open) .month-body{display:none}
+
+#journal h2{margin-bottom:14px}.filters{display:flex!important;gap:8px!important;align-items:center;flex-wrap:wrap;margin-bottom:14px!important}.filters select{appearance:none;-webkit-appearance:none;min-width:0!important;height:40px!important;padding:0 36px 0 13px!important;border-radius:11px!important;border:1px solid #29394b!important;background-color:#101821!important;color:#e7eef7!important;font-size:13px!important;font-weight:650!important;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2398a9bc' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E")!important;background-repeat:no-repeat!important;background-position:right 12px center!important;transition:border-color .15s,background-color .15s,box-shadow .15s}.filters select:hover{background-color:#14202c!important;border-color:#3a526d!important}.filters select:focus{outline:none!important;border-color:#4d91e8!important;box-shadow:0 0 0 3px rgba(77,145,232,.12)!important}.filters select:nth-child(1){width:132px!important}.filters select:nth-child(2){width:150px!important}.filters select:nth-child(3){width:158px!important}
+
+.month-summary .month-chip:nth-child(1){background:rgba(59,130,246,.12)!important;border-color:rgba(59,130,246,.30)!important;color:#83b6ff!important}
+.month-summary .month-chip:nth-child(2).pos{background:rgba(34,197,94,.14)!important;border-color:rgba(34,197,94,.34)!important;color:#5ce394!important}
+.month-summary .month-chip:nth-child(2).neg{background:rgba(239,68,68,.14)!important;border-color:rgba(239,68,68,.34)!important;color:#ff7777!important}
+.month-summary .month-chip:nth-child(3){background:rgba(168,85,247,.12)!important;border-color:rgba(168,85,247,.30)!important;color:#c9a0ff!important}
+
+
+
+
+.month-summary .income-chip.pos{background:rgba(20,184,166,.13)!important;border-color:rgba(20,184,166,.34)!important;color:#5eead4!important}
+.month-summary .income-chip.neg{background:rgba(239,68,68,.14)!important;border-color:rgba(239,68,68,.34)!important;color:#ff7777!important}
+
+#tradeForm input[type='date']{cursor:pointer;color-scheme:dark}
+#tradeForm input[type='date']::-webkit-calendar-picker-indicator{cursor:pointer;opacity:.8;filter:invert(.8)}
+
+.instrument-picker{display:grid;grid-template-columns:1fr 42px;gap:8px}.instrument-manage{border:1px solid var(--line);background:#111a24;color:#9fb0c2;border-radius:10px;cursor:pointer;font-size:17px}.instrument-manage:hover{border-color:#45617e;color:#fff}.instrument-modal{width:min(520px,94vw);background:#101821;border:1px solid #2a394b;border-radius:16px;box-shadow:0 28px 90px rgba(0,0,0,.55)}.instrument-modal-head{display:flex;justify-content:space-between;align-items:center;padding:16px 18px;border-bottom:1px solid var(--line);font-size:18px}.instrument-modal-body{padding:16px}.instrument-add{display:grid;grid-template-columns:1fr auto;gap:8px;margin-bottom:12px}.instrument-list{display:flex;flex-direction:column;gap:7px;max-height:300px;overflow:auto}.instrument-row{display:grid;grid-template-columns:1fr auto auto;gap:7px;align-items:center;background:#0c131b;border:1px solid var(--line);border-radius:10px;padding:7px}.instrument-row input{height:36px!important;padding:0 10px!important}.instrument-row button{height:34px;padding:0 10px;border-radius:8px;border:1px solid var(--line);background:#172230;color:#cbd5e1;cursor:pointer}.instrument-row .delete-inst{color:#ff7b7b;border-color:#573137;background:#261619}.instrument-help{font-size:12px;margin-top:12px;line-height:1.45}
+
+#analyticsTables{gap:14px!important}.analytics-card{position:relative;overflow:hidden;border:1px solid #28394c!important;background:linear-gradient(145deg,#111a24,#0e161f)!important}.analytics-card:before{content:'';position:absolute;left:0;top:0;right:0;height:2px;background:linear-gradient(90deg,#4f8cff,#8b5cf6,#2dd4bf)}.analytics-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}.analytics-title b{font-size:15px}.analytics-count{font-size:11px;color:#91a2b5;background:#192635;border:1px solid #2b3d51;padding:4px 7px;border-radius:999px}.analytics-table{margin-top:0!important}.analytics-table th{font-size:11px!important;text-transform:uppercase;letter-spacing:.05em;color:#75869a!important}.analytics-table td{padding-top:10px!important;padding-bottom:10px!important}.analytics-group{font-weight:700;color:#dce7f4}.metric-n{color:#82b3ff;font-weight:700}.metric-wr{display:inline-flex;padding:3px 7px;border-radius:7px;background:rgba(168,85,247,.12);color:#cba1ff;font-weight:700}.metric-r.pos,.metric-exp.pos{color:#54df96;font-weight:800}.metric-r.neg,.metric-exp.neg{color:#ff7272;font-weight:800}.metric-r.zero,.metric-exp.zero{color:#9aa9b9;font-weight:700}.grade-stars{color:#f6c453;letter-spacing:1px;font-weight:800}.analytics-table tbody tr{transition:background .15s}.analytics-table tbody tr:hover{background:#162230}
+
+.dashboard-main{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(330px,.75fr);gap:14px;align-items:stretch;margin-top:14px}
+.dashboard-left{display:grid;grid-template-rows:300px minmax(0,1fr);gap:14px;min-width:0}
+.equity-card{min-width:0;height:300px;box-sizing:border-box}
+.equity-card .chart{height:210px!important;margin-top:8px!important;padding-top:4px!important}
+.distribution-card{height:100%;min-height:0;box-sizing:border-box}
+.advice-card{margin-top:0!important;min-height:0;padding:16px 18px!important;box-sizing:border-box}
+.advice-head{margin-bottom:10px!important}
+.advice-head b{font-size:16px!important}
+.advice-sub{font-size:11px!important;color:#7f91a5!important}
+.advice-list{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px!important}
+.advice-item{display:block!important;min-width:0;padding:11px 12px!important;border-radius:11px!important}
+.advice-num{width:24px!important;height:24px!important;border-radius:7px!important;margin-bottom:8px;font-size:12px}
+.advice-title{font-size:13px!important;line-height:1.25!important;margin-bottom:5px!important}
+.advice-text{font-size:11px!important;line-height:1.38!important;color:#93a4b7!important}
+@media(max-width:1050px){.dashboard-main{grid-template-columns:1fr}.dashboard-left{grid-template-rows:auto auto}.equity-card{height:300px}.advice-list{grid-template-columns:1fr}.distribution-card{height:auto}}
+
+.advice-card{padding:16px!important;background:linear-gradient(145deg,#111a24,#0e161f)!important}
+.advice-head{display:flex!important;align-items:center!important;justify-content:space-between!important;padding:0 2px 12px!important;margin:0!important;border-bottom:1px solid #243447}
+.advice-head b{font-size:17px!important;letter-spacing:-.01em}
+.advice-sub{padding:5px 9px;border:1px solid #293b50;border-radius:999px;background:#172230;color:#91a2b5!important}
+.advice-list{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px!important;padding-top:12px}
+.advice-item{position:relative!important;display:grid!important;grid-template-columns:34px minmax(0,1fr)!important;gap:10px!important;align-items:start!important;padding:13px!important;border:1px solid #29394b!important;background:#0d151e!important;border-radius:13px!important;overflow:hidden!important}
+.advice-item:before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px}
+.advice-item.good:before{background:#35d889}.advice-item.bad:before{background:#ff6262}.advice-item.warn:before{background:#f2b84b}
+.advice-item.good{background:linear-gradient(135deg,rgba(35,180,112,.08),#0d151e 45%)!important}
+.advice-item.bad{background:linear-gradient(135deg,rgba(239,68,68,.08),#0d151e 45%)!important}
+.advice-item.warn{background:linear-gradient(135deg,rgba(245,158,11,.07),#0d151e 45%)!important}
+.advice-num{width:30px!important;height:30px!important;margin:0!important;border-radius:9px!important;font-size:13px!important}
+.advice-item.good .advice-num{background:rgba(35,180,112,.15)!important;color:#4ee39b!important}
+.advice-item.bad .advice-num{background:rgba(239,68,68,.15)!important;color:#ff7474!important}
+.advice-item.warn .advice-num{background:rgba(245,158,11,.14)!important;color:#ffc45c!important}
+.advice-title{font-size:13px!important;line-height:1.3!important;margin:1px 0 5px!important;color:#e8eef6!important}
+.advice-item.good .advice-title{color:#58dfa0!important}.advice-item.bad .advice-title{color:#ff7676!important}.advice-item.warn .advice-title{color:#f5c567!important}
+.advice-text{font-size:11px!important;line-height:1.42!important;color:#98a9bb!important}
+@media(max-width:1050px){.advice-list{grid-template-columns:1fr!important}.advice-head{align-items:flex-start!important;gap:8px}.advice-sub{white-space:nowrap}}
+
+.advice-num{
+  width:22px!important;
+  height:22px!important;
+  min-width:22px!important;
+  border-radius:6px!important;
+  font-size:11px!important;
+  font-weight:800!important;
+  line-height:1!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+}
+.advice-item{grid-template-columns:22px minmax(0,1fr)!important;gap:9px!important}
+
+.metric{position:relative!important}
+.metric-help{position:absolute;right:11px;top:11px;width:20px;height:20px;border-radius:50%;border:1px solid #33475d;background:#182331;color:#91a5ba;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;cursor:pointer;padding:0;transition:.15s}
+.metric-help:hover{color:#fff;border-color:#5594e6;background:#1b3350}
+.metric-popover{display:none;position:absolute;z-index:60;right:10px;top:38px;width:260px;padding:11px 12px;border:1px solid #33475d;border-radius:11px;background:#0b131c;box-shadow:0 16px 40px rgba(0,0,0,.45);color:#a9b8c8;font-size:11px;line-height:1.45}
+.metric-popover.open{display:block}
+.metric-popover b{display:block!important;font-size:12px!important;color:#edf3fa!important;margin:0 0 4px!important}
+.metric-popover .formula{display:block;margin-top:7px;padding:6px 7px;border-radius:7px;background:#131f2b;color:#7fb2ff;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px}
+
+.news-calendar{margin-top:14px;padding:0!important;overflow:hidden}
+.news-cal-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 17px;border-bottom:1px solid #263647;background:linear-gradient(90deg,#131e2a,#101821)}
+.news-cal-title{display:flex;align-items:center;gap:9px}.news-cal-title b{font-size:16px}.live-dot{width:7px;height:7px;border-radius:50%;background:#3ddc97;box-shadow:0 0 0 4px rgba(61,220,151,.09)}
+.news-controls{display:flex;gap:7px;align-items:center;flex-wrap:wrap}.news-controls button,.news-controls select{height:32px;border:1px solid #2d4054;background:#111b26;color:#b7c5d4;border-radius:9px;padding:0 10px;font-size:11px}
+.news-controls button{cursor:pointer}.news-controls button.active{border-color:#3e7bc4;background:#173152;color:#83b8ff}
+.news-status{padding:10px 17px;color:#8496a9;font-size:11px;border-bottom:1px solid #223244}
+.news-table-wrap{overflow:auto;max-height:390px}.news-table{width:100%;border-collapse:collapse}.news-table th{position:sticky;top:0;z-index:2;background:#101821;color:#788a9d;font-size:10px;text-transform:uppercase;letter-spacing:.05em;text-align:left;padding:9px 12px;border-bottom:1px solid #263647}
+.news-table td{padding:10px 12px;border-bottom:1px solid #202f3f;font-size:12px;white-space:nowrap}.news-table tr:hover td{background:#14202b}
+.news-event{white-space:normal!important;min-width:240px;font-weight:650;color:#e4ebf3}.currency-pill{display:inline-flex;min-width:34px;justify-content:center;padding:3px 6px;border-radius:7px;font-size:10px;font-weight:800;border:1px solid #33485f;background:#172536;color:#a9c8ec}
+.impact{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:750}.impact:before{content:'';width:7px;height:7px;border-radius:50%}.impact.high{color:#ff7777}.impact.high:before{background:#ef5350}.impact.medium{color:#ffc45c}.impact.medium:before{background:#f5a623}.impact.low{color:#8ca0b5}.impact.low:before{background:#60758a}
+.news-val{font-variant-numeric:tabular-nums}.news-empty{padding:28px 18px;text-align:center;color:#8293a6}.news-empty b{display:block;color:#dfe8f2;margin-bottom:6px}
+.api-settings{margin-top:14px}.api-row{display:grid;grid-template-columns:180px minmax(220px,1fr) auto;gap:9px;align-items:end}.api-row label{margin:0}.api-note{font-size:11px;color:#8395a8;margin-top:9px;line-height:1.45}
+@media(max-width:800px){.news-cal-head{align-items:flex-start;flex-direction:column}.api-row{grid-template-columns:1fr}.news-table td,.news-table th{padding:9px 8px}}
+
+.equity-with-calendar{display:grid!important;grid-template-columns:300px minmax(0,1fr)!important;gap:12px!important;padding:0!important;background:transparent!important;border:0!important;height:300px!important}
+.equity-chart-card{min-width:0;height:300px!important;box-sizing:border-box;overflow:hidden}
+.equity-chart-card .chart{height:210px!important;margin-top:8px!important;padding-top:4px!important}
+.mini-calendar-slot{min-width:0;height:300px}
+.mini-calendar-slot .news-calendar{margin:0!important;height:300px!important;box-sizing:border-box}
+.mini-calendar-slot .news-cal-head{padding:11px 12px!important;display:block!important}
+.mini-calendar-slot .news-cal-title{margin-bottom:9px}
+.mini-calendar-slot .news-cal-title b{font-size:14px!important}
+.mini-calendar-slot .news-controls{gap:5px!important}
+.mini-calendar-slot .news-controls button,.mini-calendar-slot .news-controls select{height:27px!important;padding:0 7px!important;font-size:9px!important;border-radius:7px!important}
+.mini-calendar-slot #calCurrency{max-width:91px}.mini-calendar-slot #calImpact{max-width:90px}
+.mini-calendar-slot .news-status{padding:7px 11px!important;font-size:9px!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mini-calendar-slot .news-table-wrap{max-height:198px!important}
+.mini-calendar-slot .news-table th{padding:6px 7px!important;font-size:8px!important}
+.mini-calendar-slot .news-table td{padding:7px!important;font-size:9px!important}
+.mini-calendar-slot .news-table th:nth-child(n+5),.mini-calendar-slot .news-table td:nth-child(n+5){display:table-cell!important}
+.mini-calendar-slot .news-event{min-width:125px!important;max-width:150px!important;font-size:9px!important}
+.mini-calendar-slot .currency-pill{min-width:28px!important;padding:2px 4px!important;font-size:8px!important}
+.mini-calendar-slot .impact{font-size:8px!important}.mini-calendar-slot .impact:before{width:5px!important;height:5px!important}
+.mini-calendar-slot .news-empty{padding:30px 12px!important;font-size:10px!important}
+.chart .bar{max-width:10px!important}
+@media(max-width:1150px){
+ .equity-with-calendar{grid-template-columns:260px minmax(0,1fr)!important}
+}
+@media(max-width:850px){
+ .equity-with-calendar{grid-template-columns:1fr!important;height:auto!important}
+ .mini-calendar-slot{height:300px}.equity-chart-card{height:300px!important}
+}
+
+/* v4.4 compact weekly calendar */
+.mini-calendar-slot .news-calendar{display:flex!important;flex-direction:column!important}
+.mini-calendar-slot .news-cal-head{padding:9px 11px!important}
+.mini-calendar-slot .news-cal-title{margin-bottom:7px!important}
+.mini-calendar-slot .news-cal-title b{font-size:13px!important}
+.mini-calendar-slot .news-controls{display:grid!important;grid-template-columns:repeat(4,1fr)!important;gap:4px!important}
+.mini-calendar-slot .news-controls button,.mini-calendar-slot .news-controls select{width:100%!important;max-width:none!important;height:25px!important;padding:0 5px!important;font-size:8.5px!important}
+
+.mini-calendar-slot .news-status{padding:5px 9px!important;font-size:8.5px!important;min-height:0!important}
+.mini-calendar-slot .news-table-wrap{max-height:none!important;flex:1!important;overflow:auto!important}
+.mini-calendar-slot .news-table{table-layout:fixed!important}
+.mini-calendar-slot .news-table th{padding:5px 5px!important;font-size:7.5px!important;letter-spacing:.025em!important}
+.mini-calendar-slot .news-table td{padding:5px!important;font-size:8.5px!important;line-height:1.2!important;vertical-align:top!important}
+.mini-calendar-slot .news-table th:nth-child(1),.mini-calendar-slot .news-table td:nth-child(1){width:38px!important}
+.mini-calendar-slot .news-table th:nth-child(2),.mini-calendar-slot .news-table td:nth-child(2){width:42px!important}
+.mini-calendar-slot .news-table th:nth-child(3),.mini-calendar-slot .news-table td:nth-child(3){width:55px!important}
+.mini-calendar-slot .news-table th:nth-child(4),.mini-calendar-slot .news-table td:nth-child(4){width:auto!important}
+.mini-calendar-slot .news-event{min-width:0!important;max-width:none!important;white-space:normal!important;overflow-wrap:anywhere!important;font-size:8.5px!important;line-height:1.18!important}
+.mini-calendar-slot .currency-pill{min-width:25px!important;padding:1px 3px!important;font-size:7.5px!important}
+.mini-calendar-slot .impact{font-size:7.5px!important;gap:3px!important}
+.mini-calendar-slot .impact:before{width:4px!important;height:4px!important}
+.mini-calendar-slot .news-table tr:hover td{background:#14202b!important}
+
+/* v4.5 dashboard geometry */
+.dashboard-main{
+  grid-template-columns:minmax(300px,.58fr) minmax(0,1.42fr) minmax(330px,.72fr)!important;
+  gap:14px!important;
+  align-items:stretch!important;
+}
+.dashboard-calendar-col{min-width:0;height:100%;display:flex}
+.dashboard-calendar-col .mini-calendar-slot{height:100%!important;min-height:520px!important;width:100%}
+.dashboard-calendar-col .news-calendar{height:100%!important;min-height:520px!important;width:100%}
+.dashboard-calendar-col .news-table-wrap{max-height:none!important;flex:1!important}
+.dashboard-content-col{display:grid;grid-template-rows:300px 220px;gap:14px;min-width:0}
+.dashboard-content-col .equity-chart-card{height:300px!important}
+.dashboard-content-col .advice-card{height:220px!important;overflow:hidden!important}
+.dashboard-content-col .advice-card .advice-head{padding-bottom:9px!important}
+.dashboard-content-col .advice-list{padding-top:9px!important;gap:8px!important}
+.dashboard-content-col .advice-item{padding:10px!important;gap:8px!important}
+.dashboard-content-col .advice-title{font-size:12px!important}
+.dashboard-content-col .advice-text{font-size:10px!important;line-height:1.32!important}
+.dashboard-content-col .advice-num{width:20px!important;height:20px!important;min-width:20px!important;font-size:10px!important}
+.dashboard-content-col .advice-item{grid-template-columns:20px minmax(0,1fr)!important}
+.distribution-card{height:534px!important}
+@media(max-width:1300px){
+ .dashboard-main{grid-template-columns:300px minmax(0,1fr)!important}
+ .distribution-card{grid-column:1/-1;height:auto!important}
+}
+@media(max-width:850px){
+ .dashboard-main{grid-template-columns:1fr!important}
+ .dashboard-calendar-col .mini-calendar-slot,.dashboard-calendar-col .news-calendar{min-height:480px!important}
+ .dashboard-content-col{grid-template-rows:300px auto}
+ .dashboard-content-col .advice-card{height:auto!important}
+ .distribution-card{grid-column:auto}
+}
+
+/* v5.1 Forex-Factory-like calendar data layout */
+.mini-calendar-slot .news-table{min-width:560px!important}
+.mini-calendar-slot .news-table-wrap{overflow:auto!important}
+.mini-calendar-slot .news-table th:nth-child(5),
+.mini-calendar-slot .news-table th:nth-child(6),
+.mini-calendar-slot .news-table th:nth-child(7),
+.mini-calendar-slot .news-table td:nth-child(5),
+.mini-calendar-slot .news-table td:nth-child(6),
+.mini-calendar-slot .news-table td:nth-child(7){width:58px!important;text-align:right!important;white-space:nowrap!important}
+
+.calendar-range-select{height:38px;border:1px solid #30465b;border-radius:12px;background:#111c28;color:#d9e4f2;padding:0 30px 0 12px;font:inherit}
+
+.news-table td:first-child{white-space:nowrap}
+
+[data-range]{display:none!important}
+.calendar-range-select{width:100%!important;height:38px!important;border:1px solid #30465b!important;border-radius:12px!important;background:#111c28!important;color:#d9e4f2!important;padding:0 30px 0 12px!important;font:inherit!important}
+
+.calendar-range-select{height:32px;border:1px solid #2d4054;background:#111b26;color:#b7c5d4;border-radius:9px;padding:0 30px 0 10px;font-size:11px;cursor:pointer}
+
+/* v6.0 — calendar stays inside its frame; long ranges scroll internally */
+.dashboard-calendar-col{
+  min-height:0!important;
+  height:534px!important;
+  max-height:534px!important;
+  overflow:hidden!important;
+}
+.dashboard-calendar-col .mini-calendar-slot,
+.dashboard-calendar-col .news-calendar{
+  height:100%!important;
+  min-height:0!important;
+  max-height:534px!important;
+  overflow:hidden!important;
+}
+.dashboard-calendar-col .news-calendar{
+  display:flex!important;
+  flex-direction:column!important;
+}
+.dashboard-calendar-col .news-cal-head,
+.dashboard-calendar-col .news-status{
+  flex:0 0 auto!important;
+}
+.dashboard-calendar-col .news-table-wrap{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  max-height:none!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  overscroll-behavior:contain!important;
+  scrollbar-gutter:stable!important;
+}
+.dashboard-calendar-col .news-table{
+  width:100%!important;
+}
+.dashboard-calendar-col .news-table thead{
+  position:sticky!important;
+  top:0!important;
+  z-index:3!important;
+  background:#101a25!important;
+}
+
+
+/* v6.2.1 — keep approved layout; allow horizontal drag inside calendar */
+.dashboard-calendar-col .news-table-wrap{
+  overflow-y:auto!important;
+  overflow-x:auto!important;
+  -webkit-overflow-scrolling:touch!important;
+  overscroll-behavior:contain!important;
+}
+.dashboard-calendar-col .news-table{
+  min-width:620px!important;
+}
+.dashboard-calendar-col .news-table-wrap::-webkit-scrollbar{
+  height:8px;
+}
+
+
+.news-event-help{cursor:help!important}
+.news-event-help:hover{background:rgba(90,140,190,.06)!important}
+
+
+/* v6.3.0 — analytics readability */
+#analytics>h2{
+  margin-bottom:18px!important;
+  font-size:22px!important;
+}
+#analyticsTables{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:16px!important;
+  align-items:start!important;
+}
+#analyticsTables .analytics-card{
+  padding:0!important;
+  border-radius:14px!important;
+  overflow:hidden!important;
+  background:#101923!important;
+  border:1px solid #2a3b4d!important;
+  box-shadow:none!important;
+}
+#analyticsTables .analytics-card:before{display:none!important}
+#analyticsTables .analytics-title{
+  margin:0!important;
+  padding:14px 16px!important;
+  border-bottom:1px solid #263748!important;
+  background:#121d28!important;
+}
+#analyticsTables .analytics-title b{
+  font-size:14px!important;
+  letter-spacing:0!important;
+}
+#analyticsTables .analytics-count{
+  font-size:9px!important;
+  padding:3px 7px!important;
+}
+#analyticsTables .analytics-table{
+  width:100%!important;
+  table-layout:fixed!important;
+  border-collapse:collapse!important;
+  margin:0!important;
+}
+#analyticsTables .analytics-table th{
+  padding:9px 12px!important;
+  font-size:9px!important;
+  color:#72869a!important;
+  background:#0e1720!important;
+  border-bottom:1px solid #263748!important;
+  text-align:right!important;
+}
+#analyticsTables .analytics-table th:first-child{text-align:left!important;width:34%!important}
+#analyticsTables .analytics-table td{
+  padding:10px 12px!important;
+  font-size:12px!important;
+  border-bottom:1px solid #22313f!important;
+  text-align:right!important;
+  white-space:nowrap!important;
+}
+#analyticsTables .analytics-table td:first-child{
+  text-align:left!important;
+  white-space:normal!important;
+}
+#analyticsTables .analytics-table tbody tr:last-child td{border-bottom:0!important}
+#analyticsTables .analytics-group{font-weight:750!important;color:#e3ebf4!important}
+#analyticsTables .metric-wr{
+  min-width:52px!important;
+  justify-content:center!important;
+  padding:3px 6px!important;
+  font-size:11px!important;
+}
+#analyticsTables .metric-n,
+#analyticsTables .metric-r,
+#analyticsTables .metric-exp{
+  font-variant-numeric:tabular-nums!important;
+}
+#analyticsTables .analytics-card.analytics-wide{
+  grid-column:1/-1!important;
+}
+#analyticsTables .analytics-card.analytics-wide .analytics-table th:first-child{
+  width:28%!important;
+}
+@media(max-width:900px){
+  #analyticsTables{grid-template-columns:1fr!important}
+  #analyticsTables .analytics-card.analytics-wide{grid-column:auto!important}
+}
+
+
+/* v6.3.3 — illustrated market background, CSS only */
+body{background:#070c11!important}
+.market-art-bg{
+  position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden;
+  background:
+    radial-gradient(circle at 78% 20%,rgba(36,105,185,.13),transparent 24%),
+    radial-gradient(circle at 18% 78%,rgba(25,150,112,.07),transparent 24%),
+    linear-gradient(rgba(64,95,121,.05) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(64,95,121,.05) 1px,transparent 1px),
+    linear-gradient(180deg,#070c11,#09111a 55%,#070c11);
+  background-size:auto,auto,42px 42px,42px 42px,auto;
+}
+.market-bull,.market-bear,.market-btc,.market-usd,.market-coin,.gold-stack,.candles,.market-chart-line{
+  position:absolute;opacity:.10;filter:drop-shadow(0 0 16px rgba(66,139,220,.10));
+}
+.market-bull{
+  right:5%;top:8%;font-size:150px;transform:rotate(-8deg);color:#47d8a3;font-family:Georgia,serif;
+}
+.market-bear{
+  left:8%;bottom:4%;font-size:130px;transform:rotate(10deg);color:#e0606c;font-family:Georgia,serif;
+}
+.market-btc{right:11%;bottom:10%;font-size:112px;font-weight:900;color:#e8a83b;transform:rotate(13deg)}
+.market-usd{left:18%;top:11%;font-size:94px;font-weight:900;color:#6ccf9b;transform:rotate(-12deg)}
+.market-coin{
+  width:62px;height:62px;border:3px solid currentColor;border-radius:50%;
+  display:grid;place-items:center;font-size:31px;font-weight:900;
+}
+.coin-a{right:30%;top:8%;color:#d99a37;transform:rotate(16deg)}
+.coin-b{left:34%;bottom:7%;color:#65c895;transform:rotate(-10deg)}
+.gold-stack{right:24%;bottom:4%;width:140px;height:80px}
+.gold-stack i{
+  position:absolute;width:88px;height:22px;border:2px solid #dca840;
+  transform:skewX(-18deg);background:rgba(220,168,64,.08);border-radius:3px;
+}
+.gold-stack i:nth-child(1){left:5px;bottom:2px}
+.gold-stack i:nth-child(2){left:25px;bottom:25px}
+.gold-stack i:nth-child(3){left:45px;bottom:48px}
+.candles{left:27%;top:6%;width:390px;height:150px;display:flex;gap:18px;align-items:center}
+.candles i{position:relative;width:9px;border-radius:2px}
+.candles i:before{content:"";position:absolute;left:4px;top:-18px;width:1px;height:calc(100% + 36px);background:currentColor}
+.candles .up{height:44px;background:#3bd39d;color:#3bd39d}
+.candles .down{height:60px;background:#e45d6a;color:#e45d6a}
+.candles i:nth-child(2){margin-top:40px}.candles i:nth-child(3){margin-top:10px}
+.candles i:nth-child(4){margin-top:-35px}.candles i:nth-child(5){margin-top:-5px}
+.candles i:nth-child(6){margin-top:-65px}.candles i:nth-child(7){margin-top:-25px}
+.candles i:nth-child(8){margin-top:-85px}.candles i:nth-child(9){margin-top:-110px}
+.candles i:nth-child(10){margin-top:-70px}.candles i:nth-child(11){margin-top:-125px}
+.market-chart-line{
+  left:6%;right:4%;top:40%;height:220px;opacity:.08;
+  background:linear-gradient(158deg,transparent 0 14%,#58a3ff 14.2% 14.6%,transparent 14.8% 25%,#58a3ff 25.2% 25.6%,transparent 25.8% 36%,#58a3ff 36.2% 36.6%,transparent 36.8% 50%,#58a3ff 50.2% 50.6%,transparent 50.8% 65%,#58a3ff 65.2% 65.6%,transparent 65.8%);
+}
+
+
+/* v6.3.4 — brighter market-art background */
+.market-art-bg{
+  background:
+    radial-gradient(circle at 78% 20%,rgba(35,120,255,.22),transparent 25%),
+    radial-gradient(circle at 15% 75%,rgba(22,220,155,.13),transparent 25%),
+    radial-gradient(circle at 55% 95%,rgba(238,174,54,.09),transparent 28%),
+    linear-gradient(rgba(76,119,153,.075) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(76,119,153,.075) 1px,transparent 1px),
+    linear-gradient(180deg,#070c11,#0a1420 55%,#070c11)!important;
+  background-size:auto,auto,auto,42px 42px,42px 42px,auto!important;
+}
+.market-bull{opacity:.22!important;color:#39e6a7!important;filter:drop-shadow(0 0 24px rgba(57,230,167,.32))!important}
+.market-bear{opacity:.20!important;color:#ff6373!important;filter:drop-shadow(0 0 24px rgba(255,99,115,.28))!important}
+.market-btc{opacity:.23!important;color:#ffb52f!important;filter:drop-shadow(0 0 26px rgba(255,181,47,.30))!important}
+.market-usd{opacity:.20!important;color:#61e5a8!important;filter:drop-shadow(0 0 22px rgba(97,229,168,.25))!important}
+.market-coin{opacity:.22!important}
+.coin-a{color:#ffc14d!important;box-shadow:0 0 26px rgba(255,193,77,.16)}
+.coin-b{color:#58e4a3!important;box-shadow:0 0 26px rgba(88,228,163,.14)}
+.gold-stack{opacity:.22!important;filter:drop-shadow(0 0 18px rgba(230,174,62,.24))!important}
+.gold-stack i{border-color:#f1b941!important;background:rgba(241,185,65,.13)!important}
+.candles{opacity:.24!important;filter:drop-shadow(0 0 13px rgba(75,158,255,.18))!important}
+.candles .up{background:#42e2a7!important;color:#42e2a7!important}
+.candles .down{background:#ff6573!important;color:#ff6573!important}
+.market-chart-line{opacity:.15!important;filter:drop-shadow(0 0 8px rgba(88,163,255,.25))!important}
+
+
+/* v6.3.5 — journal naming + text logo */
+.brand-tagline{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  margin-top:7px;
+  color:#7f91a4;
+  font-size:11px;
+  line-height:1;
+  letter-spacing:.015em;
+  white-space:nowrap;
+}
+.brand-tagline b{
+  color:#55a0ff;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+}
+.brand-tagline span{color:#42576b}
+.brand-tagline em{
+  color:#9aabbc;
+  font-style:normal;
+  font-weight:650;
+}
+
+
+/* v6.3.6 — compact brand lockup */
+.brand-tagline{
+  display:inline-flex!important;
+  width:max-content!important;
+  align-items:center!important;
+  gap:6px!important;
+  margin-top:9px!important;
+  padding:5px 8px!important;
+  border:1px solid #344657!important;
+  border-radius:6px!important;
+  background:rgba(13,22,31,.72)!important;
+  color:#8fa1b3!important;
+  font-size:9px!important;
+  line-height:1!important;
+  letter-spacing:.035em!important;
+}
+.brand-tagline b,
+.brand-tagline span,
+.brand-tagline em{
+  color:inherit!important;
+  font-size:inherit!important;
+  font-weight:700!important;
+  font-style:normal!important;
+  text-transform:none!important;
+  letter-spacing:inherit!important;
+}
+
+
+/* v6.3.7 — logo position + tiny CSS candles */
+.brand-tagline{
+  position:absolute!important;
+  left:172px!important;
+  top:82px!important;
+  margin:0!important;
+  z-index:5!important;
+}
+.mini-candles{
+  display:inline-flex!important;
+  align-items:center!important;
+  gap:2px!important;
+  height:13px!important;
+  margin-right:2px!important;
+  color:inherit!important;
+}
+.mini-candles i{
+  display:block!important;
+  position:relative!important;
+  width:3px!important;
+  border-radius:1px!important;
+  background:currentColor!important;
+}
+.mini-candles i:before{
+  content:""!important;
+  position:absolute!important;
+  left:1px!important;
+  width:1px!important;
+  background:currentColor!important;
+}
+.mini-candles i:nth-child(1){height:6px!important}
+.mini-candles i:nth-child(1):before{top:-3px!important;height:12px!important}
+.mini-candles i:nth-child(2){height:10px!important}
+.mini-candles i:nth-child(2):before{top:-2px!important;height:14px!important}
+.mini-candles i:nth-child(3){height:7px!important}
+.mini-candles i:nth-child(3):before{top:-3px!important;height:13px!important}
+@media(max-width:900px){
+  .brand-tagline{position:static!important;margin-top:9px!important}
+}
+
+
+/* v6.3.8 — logo directly under title; colored CSS candles */
+.brand-tagline{
+  position:absolute!important;
+  left:42px!important;
+  top:78px!important;
+  margin:0!important;
+  z-index:20!important;
+}
+.mini-candles i:nth-child(1){
+  background:#38d99f!important;
+  color:#38d99f!important;
+}
+.mini-candles i:nth-child(2){
+  background:#ff6373!important;
+  color:#ff6373!important;
+}
+.mini-candles i:nth-child(3){
+  background:#38d99f!important;
+  color:#38d99f!important;
+}
+.mini-candles i:before{background:currentColor!important}
+@media(max-width:900px){
+  .brand-tagline{
+    position:static!important;
+    margin-top:9px!important;
+  }
+}
+
+
+/* v6.3.9 — align logo directly under “Розумний” */
+.brand-tagline{
+  position:absolute!important;
+  left:164px!important;
+  top:78px!important;
+  margin:0!important;
+  z-index:20!important;
+}
+@media(max-width:900px){
+  .brand-tagline{
+    position:static!important;
+    margin-top:9px!important;
+  }
+}
+
+
+/* v6.3.10 — logo in the user-marked rectangle */
+.brand-tagline{
+  position:absolute!important;
+  left:76px!important;
+  top:99px!important;
+  margin:0!important;
+  z-index:30!important;
+}
+@media(max-width:900px){
+  .brand-tagline{
+    position:static!important;
+    margin-top:9px!important;
+  }
+}
+
+
+/* v6.3.11 — approved header placement */
+.brand-tagline{
+  position:absolute!important;
+  left:70px!important;
+  top:98px!important;
+  margin:0!important;
+  z-index:30!important;
+}
+@media(max-width:900px){
+  .brand-tagline{
+    position:static!important;
+    margin-top:9px!important;
+  }
+}
+
+
+/* v6.3.12 — title + logo are one responsive lockup */
+.brand-lockup{
+  display:inline-flex!important;
+  flex-direction:column!important;
+  align-items:flex-start!important;
+  width:max-content!important;
+  position:relative!important;
+}
+.brand-lockup .brand{
+  position:static!important;
+  margin:0!important;
+}
+.brand-lockup .brand-tagline{
+  position:static!important;
+  left:auto!important;
+  top:auto!important;
+  right:auto!important;
+  bottom:auto!important;
+  margin:9px 0 0 0!important;
+  align-self:flex-start!important;
+  z-index:auto!important;
+}
+@media(max-width:900px){
+  .brand-lockup .brand-tagline{
+    position:static!important;
+    margin-top:9px!important;
+  }
+}
+
+
+/* v6.4.0 — position size calculator */
+.lotcalc-layout{display:grid;grid-template-columns:1.35fr .8fr;gap:16px;align-items:start}
+.lotcalc-card,.lotcalc-result{padding:20px!important}
+.lotcalc-head{display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:16px;border-bottom:1px solid var(--line);margin-bottom:16px}
+.lotcalc-head b{display:block;font-size:16px}.lotcalc-head span:not(.lotcalc-badge){display:block;color:var(--muted);font-size:12px;margin-top:4px}
+.lotcalc-badge{padding:5px 9px;border:1px solid #31506c;border-radius:8px;background:#122337;color:#83b8ff;font-size:11px;font-weight:800}
+.lotcalc-form{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.lotcalc-form label{display:flex;flex-direction:column;gap:7px;color:#9babbc;font-size:12px;font-weight:650}
+.lotcalc-form input,.lotcalc-form select{width:100%;background:#0d151e;border:1px solid #2a3b4d;color:var(--text);border-radius:9px;padding:11px 12px;font:inherit}
+.lotcalc-actions{display:flex;gap:9px;margin-top:17px}.lotcalc-note{margin-top:12px;color:#75889c;font-size:11px}
+.lotcalc-result{position:sticky;top:105px;background:linear-gradient(180deg,#111c27,#0d161f)!important}
+.lotcalc-lots{font-size:54px;font-weight:850;letter-spacing:-.055em;margin:8px 0 18px;color:#67a4ff;font-variant-numeric:tabular-nums}
+.lotcalc-lots small{font-size:17px;letter-spacing:0;color:#8fa0b1;font-weight:700}
+.lotcalc-result-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.lotcalc-result-grid div{padding:12px;border:1px solid #263849;border-radius:10px;background:#0b141d}
+.lotcalc-result-grid span{display:block;color:#7f91a4;font-size:10px;margin-bottom:5px}.lotcalc-result-grid b{font-size:15px;font-variant-numeric:tabular-nums}
+.lotcalc-formula{margin-top:14px;padding-top:12px;border-top:1px solid #263849;color:#6f8295;font-size:10px;line-height:1.5}
+@media(max-width:800px){.lotcalc-layout{grid-template-columns:1fr}.lotcalc-form{grid-template-columns:1fr}.lotcalc-result{position:static}}
+
+
+/* v6.5.0 — compact multi-screenshot slots + timeframe */
+.multi-shot-section{margin-top:4px}
+.multi-shot-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}
+.multi-shot-head>label{margin:0!important}
+.shot-add{padding:7px 10px!important;font-size:11px!important}
+.shot-slot-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(185px,220px));
+  gap:12px;
+  align-items:start;
+}
+.shot-slot{
+  position:relative;
+  aspect-ratio:1/1;
+  min-width:0;
+  border:1.5px dashed #36506d;
+  border-radius:12px;
+  background:#0b131c;
+  overflow:hidden;
+  cursor:pointer;
+  transition:.15s;
+}
+.shot-slot:hover,.shot-slot.focus{border-color:#5792e8;background:#0e1925}
+.shot-slot img{width:100%;height:100%;object-fit:cover;display:block}
+.shot-slot-empty{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:34px 12px 12px;color:#718397;font-size:11px}
+.shot-slot-empty b{display:block;color:#dce6f2;font-size:13px;margin-bottom:5px}
+.shot-tf{
+  position:absolute;left:8px;top:8px;z-index:4;
+  width:66px!important;padding:5px 7px!important;
+  border:1px solid #40566d!important;border-radius:7px!important;
+  background:rgba(9,17,25,.92)!important;color:#dce7f3!important;
+  font-size:10px!important;font-weight:800!important;
+}
+.shot-slot-remove{
+  position:absolute;right:8px;top:8px;z-index:5;
+  width:25px;height:25px;padding:0;border:1px solid #61373d;border-radius:7px;
+  background:rgba(42,20,24,.94);color:#ff7b86;cursor:pointer;font-size:16px;line-height:1;
+}
+.shot-slot-file{display:none}
+.shot-slot-badge{
+  position:absolute;left:8px;bottom:8px;z-index:3;
+  padding:4px 7px;border-radius:6px;background:rgba(7,14,21,.88);
+  border:1px solid #30465a;color:#a9bbcd;font-size:9px;font-weight:800;
+}
+.detail-shot-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-top:10px}
+.detail-shot-mini{position:relative;aspect-ratio:1/1;border:1px solid #2a3b4d;border-radius:10px;overflow:hidden;background:#0b131c}
+.detail-shot-mini img{width:100%;height:100%;object-fit:cover;cursor:zoom-in}
+.detail-shot-mini span{position:absolute;left:7px;bottom:7px;padding:4px 7px;border-radius:6px;background:rgba(7,14,21,.88);color:#dce7f3;font-size:10px;font-weight:800}
+@media(max-width:700px){.shot-slot-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+
+/* v6.5.2 — analytics: entry model left, all other groups right */
+#analyticsTables{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+  gap:18px!important;
+  align-items:start!important;
+}
+.analytics-left-col,
+.analytics-right-col{
+  display:flex!important;
+  flex-direction:column!important;
+  gap:16px!important;
+  min-width:0!important;
+}
+#analyticsTables .analytics-card,
+#analyticsTables .analytics-card.analytics-wide{
+  grid-column:auto!important;
+  width:100%!important;
+}
+@media(max-width:900px){
+  #analyticsTables{grid-template-columns:1fr!important}
+}
+
+
+/* v6.5.6 — screenshot slots accept image paste OR TradingView link */
+.shot-slot-card{display:flex;flex-direction:column;gap:7px;min-width:0}
+.shot-url-row{display:flex;gap:6px;align-items:center}
+.shot-url-input{width:100%!important;min-width:0!important;padding:8px 9px!important;border:1px solid #2d4358!important;border-radius:8px!important;background:#0b141d!important;color:#cbd8e6!important;font-size:10px!important}
+.shot-url-input::placeholder{color:#617488}
+.shot-url-open{display:inline-flex;align-items:center;justify-content:center;width:31px;height:31px;flex:0 0 31px;border:1px solid #2d4358;border-radius:8px;background:#101b26;color:#8fbaff;text-decoration:none;font-size:13px}
+.shot-slot-empty .paste-methods{margin-top:7px;color:#8093a7;font-size:10px;line-height:1.45}
+.shot-link-preview{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+
+
+/* v6.5.7 — screenshot interaction: paste area is focus-only, file picker has its own button */
+.shot-file-btn{position:absolute;right:8px;bottom:8px;z-index:5;border:1px solid #36506d;background:rgba(12,24,35,.94);color:#b9c9da;border-radius:7px;padding:6px 9px;font-size:10px;font-weight:750;cursor:pointer}.shot-file-btn:hover{border-color:#5792e8;color:#fff}.shot-slot.has-preview img{cursor:zoom-in}.shot-slot-empty{cursor:text}
+
+/* v6.5.8 screenshot reliability */
+.shot-slot.preview-error:after{content:"Прев’ю TradingView не завантажилось — посилання збережене ↓";position:absolute;left:16px;right:16px;top:50%;transform:translateY(-50%);text-align:center;color:#91a4b8;font-size:11px;line-height:1.4;pointer-events:none}.shot-slot:focus{outline:2px solid #5792e8;outline-offset:2px}.shot-slot-empty{user-select:none}
+
+
+/* v6.5.9 — stable TradingView link card (no remote thumbnail dependency) */
+.shot-tv-card{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:50px 18px 48px;text-align:center;background:radial-gradient(circle at 50% 35%,rgba(41,98,255,.12),transparent 45%);color:#b8c8d8}
+.shot-tv-card strong{font-size:14px;color:#e7eef7}.shot-tv-card span{font-size:10px;color:#8295a8;line-height:1.45}.shot-tv-card .tv-mark{font-size:24px;font-weight:850;color:#78a9ff;letter-spacing:-.04em}
+.detail-tv-card{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;text-decoration:none;background:radial-gradient(circle at 50% 35%,rgba(41,98,255,.12),transparent 48%);color:#9eb2c7}.detail-tv-card b{color:#e7eef7;font-size:13px}.detail-tv-card small{color:#78a9ff;font-weight:800}
+
+
+
+/* v6.5.12 — premium compact header refresh */
+header{
+  background:linear-gradient(180deg,rgba(10,16,24,.97),rgba(8,13,20,.94))!important;
+  border-bottom:1px solid rgba(93,132,177,.22)!important;
+  box-shadow:0 12px 36px rgba(0,0,0,.24)!important;
+  backdrop-filter:blur(18px) saturate(135%)!important;
+}
+header:before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(520px 120px at 13% 0%,rgba(76,141,255,.12),transparent 70%),radial-gradient(440px 110px at 78% 0%,rgba(54,211,153,.055),transparent 72%);
+}
+header .wrap.top{
+  position:relative;max-width:1450px!important;padding:18px 28px!important;min-height:112px;
+  gap:28px!important;
+}
+.brand-lockup{min-width:330px!important}
+.brand-lockup .brand{
+  font-size:25px!important;font-weight:900!important;letter-spacing:-.035em!important;line-height:1.05!important;
+  color:#f4f8fd!important;text-shadow:0 2px 18px rgba(103,164,255,.08);
+}
+.brand-lockup .brand:after{
+  content:'';display:block;width:54px;height:2px;margin-top:9px;border-radius:99px;
+  background:linear-gradient(90deg,#5b9cff,#42d6a4);box-shadow:0 0 14px rgba(91,156,255,.35);
+}
+.brand-lockup .brand-tagline{
+  margin-top:9px!important;padding:6px 10px!important;border-radius:9px!important;
+  background:rgba(12,22,32,.72)!important;border:1px solid rgba(77,110,145,.5)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.025)!important;
+  color:#8293a6!important;letter-spacing:.035em!important;
+}
+.brand-lockup .brand-tagline b{color:#9fb0c3!important}
+header .tabs{
+  flex:1;justify-content:flex-end!important;align-items:center!important;gap:7px!important;
+  padding:6px!important;border:1px solid rgba(54,75,98,.46)!important;border-radius:16px!important;
+  background:rgba(9,15,23,.54)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.025)!important;
+}
+header .tabs button{
+  position:relative;border:1px solid transparent!important;background:transparent!important;
+  color:#b8c3cf!important;padding:11px 15px!important;border-radius:11px!important;font-weight:700!important;
+  transition:background .18s,border-color .18s,color .18s,transform .18s,box-shadow .18s!important;
+}
+header .tabs button:hover{
+  color:#edf4fc!important;background:#111c28!important;border-color:#26394d!important;transform:translateY(-1px);
+}
+header .tabs button.active{
+  color:#fff!important;background:linear-gradient(180deg,#5798ff,#3e7fe9)!important;
+  border-color:#78b0ff!important;box-shadow:0 6px 18px rgba(63,130,235,.28),inset 0 1px 0 rgba(255,255,255,.22)!important;
+}
+header .tabs button[data-tab='add']{
+  color:#bfead9!important;border-color:rgba(61,191,139,.22)!important;background:rgba(29,111,81,.09)!important;
+}
+header .tabs button[data-tab='add']:hover{background:rgba(29,111,81,.18)!important;border-color:rgba(61,191,139,.4)!important;color:#d8f7ea!important}
+header .tabs button[data-tab='add'].active{background:linear-gradient(180deg,#28b67d,#1b8e62)!important;border-color:#54d7a3!important;color:#fff!important;box-shadow:0 6px 18px rgba(35,177,120,.23)!important}
+@media(max-width:1100px){
+  header .wrap.top{align-items:flex-start!important;flex-direction:column!important;min-height:0;padding:16px 20px!important}
+  .brand-lockup{min-width:0!important}
+  header .tabs{width:100%;justify-content:flex-start!important;overflow-x:auto;flex-wrap:nowrap!important}
+  header .tabs button{white-space:nowrap}
+}
+@media(max-width:650px){
+  header .wrap.top{padding:14px!important}.brand-lockup .brand{font-size:21px!important}
+  header .tabs{border-radius:13px!important;padding:4px!important}.tabs button{padding:9px 11px!important}
+}
+
+/* v6.5.14 — compact header alignment: remove empty nav space and restore original title position */
+header .wrap.top{
+  max-width:1250px!important;
+  padding:18px!important;
+  justify-content:space-between!important;
+}
+.brand-lockup{min-width:0!important;flex:0 0 auto!important}
+header .tabs{
+  flex:0 0 auto!important;
+  width:auto!important;
+  justify-content:flex-start!important;
+  margin-left:auto!important;
+}
+@media(max-width:1100px){
+  header .wrap.top{padding:16px 20px!important}
+  header .tabs{width:100%!important;margin-left:0!important}
+}
+@media(max-width:650px){header .wrap.top{padding:14px!important}}
+
+/* v6.5.14 — narrower header */
+header .wrap.top{
+  padding:10px 18px!important;
+  min-height:88px!important;
+}
+.brand-lockup .brand{font-size:24px!important}
+.brand-lockup .brand:after{margin-top:6px!important}
+.brand-lockup .brand-tagline{margin-top:6px!important;padding:5px 9px!important}
+header .tabs{padding:5px!important}
+header .tabs button{padding:10px 14px!important}
+@media(max-width:1100px){header .wrap.top{padding:12px 20px!important}}
+@media(max-width:650px){header .wrap.top{padding:11px 14px!important}}
+</style></head><body>
+<div class="market-art-bg" aria-hidden="true">
+  <div class="market-chart-line"></div>
+  <div class="market-bull">♉</div>
+  <div class="market-bear">♟</div>
+  <div class="market-btc">₿</div>
+  <div class="market-usd">$</div>
+  <div class="market-coin coin-a">₿</div>
+  <div class="market-coin coin-b">$</div>
+  <div class="gold-stack"><i></i><i></i><i></i></div>
+  <div class="candles">
+    <i class="up"></i><i class="down"></i><i class="up"></i><i class="up"></i>
+    <i class="down"></i><i class="up"></i><i class="down"></i><i class="up"></i>
+    <i class="up"></i><i class="down"></i><i class="up"></i>
+  </div>
+</div>
+<header><div class='wrap top'><div class='brand-lockup'><div class='brand'>Розумний трейдинг-журнал</div><div class='brand-tagline'><span class='mini-candles'><i></i><i></i><i></i></span><b>Трейдинг</b><span>|</span><em>Не кнопка бабло</em></div></div><nav class='tabs'><button data-tab='dash' class='active'>Дашборд</button><button data-tab='journal'>Журнал</button><button data-tab='add'>+ Нова угода</button><button data-tab='analytics'>Аналітика</button><button data-tab='calculator'>Калькулятор</button><button data-tab='settings'>Налаштування</button></nav></div></header><main>
+<section id='dash' class='active'><h2>Дашборд</h2><div id='metrics' class='grid'></div><div class='dashboard-main'>
+  <div class='dashboard-calendar-col'>
+    <div class='mini-calendar-slot'><div class='card news-calendar'>
+  <div class='news-cal-head'>
+    <div class='news-cal-title'><span class='live-dot'></span><b>Економічний календар</b><span class='muted' style='font-size:11px'></span></div>
+    <div class='news-controls'>
+      <select id='calendarRange' class='calendar-range-select' aria-label='Період календаря'>
+        <option value='0'>Сьогодні</option>
+        <option value='1'>Завтра</option>
+        <option value='7' selected>7 днів</option>
+        <option value='30'>30 днів</option>
+      </select>
+      <select id='calCurrency'><option value='EUR,USD'>EUR + USD</option><option value='ALL' selected>Усі валюти</option><option value='USD'>USD</option><option value='EUR'>EUR</option><option value='GBP'>GBP</option><option value='JPY'>JPY</option><option value='CHF'>CHF</option><option value='CAD'>CAD</option><option value='AUD'>AUD</option><option value='NZD'>NZD</option></select>
+      <select id='calImpact'><option value='ALL'>Усі важливості</option><option value='high'>High</option><option value='medium'>Medium+</option></select>
+      <button type='button' id='refreshCalendar'>↻ Оновити</button>
+    </div>
+  </div>
+  <div id='calendarStatus' class='news-status'>Календар завантажується автоматично · без API key.</div>
+  <div class='news-table-wrap'><div id='economicCalendar' class='news-empty'><b>Завантажую календар…</b>Актуальні макроекономічні події з’являться автоматично.</div></div>
+</div></div>
+  </div>
+  <div class='dashboard-content-col'>
+    <div class='card equity-chart-card'><b>Крива результату, R</b><div id='equity' class='chart'></div></div>
+    <div class='card advice-card'><div class='advice-head'><b>Топ-3 поради для тебе!</b><span class='advice-sub'>На основі статистики журналу</span></div><div id='traderAdvice' class='advice-list'></div></div>
+  </div>
+  <div class='card distribution-card'><b>Розподіл</b><div id='breakdown' style='margin-top:14px'></div></div>
+</div>
+</section>
+<section id='journal'><h2>Журнал</h2><div class='filters'><select id='fSession'><option value=''>Усі сесії</option></select><select id='fSide'><option value=''>Long + Short</option><option>Long</option><option>Short</option></select><select id='fResult'><option value=''>Усі результати</option><option value='TP'>TP</option><option value='SL'>SL</option></select></div><div id='rows'></div></section>
+<section id='add'><h2>Нова угода</h2><div class='card'><form id='tradeForm'><label>Дата<input name='date' type='date' required></label><label>Інструмент
+    <div class='instrument-picker'>
+      <select name='pair' id='pairSelect'></select>
+      <button type='button' class='instrument-manage' id='manageInstruments' title='Редагувати інструменти'>⚙</button>
+    </div>
+    </label><label>Сесія<select name='session'><option>London</option><option>New-York</option><option>Asia</option></select></label><label>Напрямок<select name='side'><option>Long</option><option>Short</option></select></label><label>Модель входу
+  <div class='instrument-picker'>
+    <select name='model' id='modelSelect'></select>
+    <button type='button' class='instrument-manage' id='manageModels' title='Редагувати моделі входу'>⚙</button>
+  </div>
+</label><label>Оцінка сетапу<select name='grade'><option value='A'>★★★</option><option value='B' selected>★★</option><option value='C'>★</option></select></label><label>HTF тренд<select name='trend'><option>Long</option><option>Short</option><option>Range</option></select></label><label>Зняття ліквідності<select name='sweep'><option>Yes</option><option>No</option></select></label><label>Ліквідність<input name='liquidity' placeholder='Мінімум Азії / свінг / немає'></label><label>Ризик %<select name='risk'><option value='.25'>0.25%</option><option value='.5'>0.5%</option><option value='1'>1%</option><option value='2'>2%</option></select></label><label>Результат<select name='result'><option>TP</option><option>SL</option><option>BE</option><option>Missed</option><option>Cancelled</option></select></label><label>Результат, R<input name='r' type='number' step='.1' value='2'></label><div class='full multi-shot-section'>
+  <div class='multi-shot-head'><label>Скрін ДО</label><button type='button' class='btn shot-add' data-group='before'>+ Додати скрін</button></div>
+  <div id='shotsBefore' class='shot-slot-grid'></div>
+</div>
+<div class='full multi-shot-section'>
+  <div class='multi-shot-head'><label>Скрін ПІСЛЯ</label><button type='button' class='btn shot-add' data-group='after'>+ Додати скрін</button></div>
+  <div id='shotsAfter' class='shot-slot-grid'></div>
+</div><label class='full'>Нотатки<textarea name='notes'></textarea></label><div class='actions full'><button class='btn primary'>Зберегти угоду</button><span id='saved' class='muted'></span></div></form></div></section>
+<section id='analytics'><h2>Аналітика</h2><div id='analyticsTables' class='two'></div></section>
+
+<section id='calculator'>
+  <h2>Калькулятор лотажу</h2>
+  <div class='lotcalc-layout'>
+    <div class='card lotcalc-card'>
+      <div class='lotcalc-head'>
+        <div><b>Розрахунок позиції</b><span>Ризик → Stop Loss → потрібний лот</span></div>
+        <span class='lotcalc-badge'>FX</span>
+      </div>
+      <div class='lotcalc-form'>
+        <label>Валютна пара
+          <select id='lcPair'>
+            <option>EURUSD</option><option>GBPUSD</option><option>AUDUSD</option><option>NZDUSD</option>
+            <option>USDJPY</option><option>USDCHF</option><option>USDCAD</option>
+          </select>
+        </label>
+        <label>Валюта рахунку
+          <select id='lcCurrency'><option>USD</option></select>
+        </label>
+        <label>Розмір рахунку, $
+          <input id='lcBalance' type='number' min='0' step='100' value='2500'>
+        </label>
+        <label>Ризик, %
+          <select id='lcRisk'><option value='.25'>0.25%</option><option value='.5' selected>0.5%</option><option value='1'>1%</option><option value='2'>2%</option></select>
+        </label>
+        <label>Stop Loss, pips
+          <input id='lcStop' type='number' min='.1' step='.1' value='6.5'>
+        </label>
+        <label id='lcPriceWrap'>Поточна ціна
+          <input id='lcPrice' type='number' min='.00001' step='.00001' placeholder='Потрібна для USDJPY/CHF/CAD'>
+        </label>
+      </div>
+      <div class='lotcalc-actions'>
+        <button type='button' class='btn primary' id='lcCalculate'>Розрахувати</button>
+        <button type='button' class='btn' id='lcReset'>Скинути</button>
+      </div>
+      <div class='lotcalc-note' id='lcNote'>Для EURUSD та інших пар із USD справа ціна не потрібна.</div>
+    </div>
+
+    <div class='card lotcalc-result'>
+      <span class='muted'>Рекомендований розмір позиції</span>
+      <div class='lotcalc-lots' id='lcLots'>0.19 <small>lot</small></div>
+      <div class='lotcalc-result-grid'>
+        <div><span>Ризик грошима</span><b id='lcMoney'>$12.50</b></div>
+        <div><span>Вартість 1 pip</span><b id='lcPipValue'>$1.92</b></div>
+        <div><span>Stop Loss</span><b id='lcStopOut'>6.5 pips</b></div>
+        <div><span>Ризик</span><b id='lcRiskOut'>0.50%</b></div>
+      </div>
+      <div class='lotcalc-formula'>Lot = ризик у $ ÷ (SL у pips × вартість pip для 1 lot)</div>
+    </div>
+  </div>
+</section>
+
+<section id='settings'><h2>Налаштування</h2><div class='card'><p><b>Дані зберігаються у твоєму браузері</b></p><p class='muted'>v1 використовує localStorage. Можна імпортувати старий CSV та експортувати резервну копію у JSON. Бекенд і авторизацію додамо у наступних версіях.</p><div class='actions'><input id='csv' type='file' accept='.csv'><button class='btn' id='export'>Експорт JSON</button><button class='btn' id='reset'>Скинути до початкових даних</button></div></div>
+</div></section>
+</main><div id="instrumentModal" class="modal-backdrop"><div class="instrument-modal">
+      <div class="instrument-modal-head"><b>Інструменти</b><button type="button" class="close-modal" id="closeInstrumentModal">×</button></div>
+      <div class="instrument-modal-body">
+        <div class="instrument-add"><input id="newInstrument" placeholder="Наприклад: GBPUSD, XAUUSD, BTCUSDT"><button type="button" class="btn primary" id="addInstrument">Додати</button></div>
+        <div id="instrumentList" class="instrument-list"></div>
+        <div class="muted instrument-help">Новий інструмент автоматично з’явиться у списку для наступних угод. Тут його можна перейменувати або видалити.</div>
+      </div>
+    </div>
+</div>
+<div id="modelModal" class="modal-backdrop"><div class="instrument-modal">
+  <div class="instrument-modal-head"><b>Моделі входу</b><button type="button" class="close-modal" id="closeModelModal">×</button></div>
+  <div class="instrument-modal-body">
+    <div class="instrument-add"><input id="newModel" placeholder="Наприклад: OB + SMT, CISD, Unicorn"><button type="button" class="btn primary" id="addModel">Додати</button></div>
+    <div id="modelList" class="instrument-list"></div>
+    <div class="muted instrument-help">Тут можна додавати власні моделі, перейменовувати або видаляти їх. Зміни застосовуються до списку для нових угод.</div>
+  </div>
+</div></div>
+<div id="imageLightbox"  class="image-lightbox"><button class="lightbox-close" onclick="closeImageLightbox()">×</button><img id="lightboxImage" alt="Скрін угоди"></div><div id="tradeDetail"  class="modal-backdrop"><div class="trade-modal"><div id="tradeDetailContent"></div></div></div>
+<script id="seed-data" type="application/json">[{"№": "Trade №44", "Дата, час": "18/09/2026", "Сесія": "London", "Пара": "EURUSD", "Сетап": "H1M5", "Позиція": "Long", "Ризик, %": "0.5%", "RR": -1, "За планом": "No", "Multi-select": "STB/BTS", "Примітки": "Продовження Лонг тренду, після зняття азія лоу на зняття азія хай.", "H4": "", "H1": "https://www.tradingview.com/x/yfsftmTY/", "m15": "", "m5": "https://www.tradingview.com/x/9iiGHz47/"}, {"№": "Trade №43", "Дата, час": "16/09/2026", "Сесія": "New-York", "Пара": "EURUSD", "Сетап": "H1M5", "Позиція": "Long", "Ризик, %": "0.5%", "RR": -1, "За планом": "No", "Multi-select": "FVG", "Примітки": "Після зняття ліквідності на старшому таймфреймі, зайшов в лонг. Ціна була в боковику.", "H4": "", "H1": "https://www.tradingview.com/x/Va0BDswt/", "m15": "", "m5": "https://www.tradingview.com/x/9V6qMwLS/"}, {"№": "Trade №42", "Дата, час": "14/09/2026", "Сесія": "London", "Пара": "EURUSD", "Сетап": "H1M5", "Позиція": "Long", "Ризик, %": "0.25%", "RR": 2, "За планом": "No", "Multi-select": "FVG", "Примітки": "Від фвг м5 зайшов лонг проти денного тренду.", "H4": "", "H1": "https://www.tradingview.com/x/CrSflinK/", "m15": "", "m5": "https://www.tradingview.com/x/rdBtpjK5/"}, {"№": "Trade №41", "Дата, час": "10/09/2026", "Сесія": "London", "Пара": "EURUSD", "Сетап": "H1M5", "Позиція": "Short", "Ризик, %": "0.5%", "RR": 2.5, "За планом": "No", "Multi-select": "FVG", "Примітки": "Після зняття хай Азії+ денної ліквідності+фвг пішла ціна на зняття лоу азії.", "H4": "", "H1": "https://www.tradingview.com/x/4sRuOZOy/", "m15": "", "m5": "https://www.tradingview.com/x/BX51FMTR/"}, {"№": "Trade №40", "Дата, час": "08/09/2026", "Сесія": "New-York", "Пара": "EURUSD", "Сетап": "H1M5", "Позиція": "Long", "Ризик, %": "0.5%", "RR": 3.7, "За планом": "No", "Multi-select": "STB/BTS", "Примітки": "Після АМД моделі заходив у лонг до зняття денної ліквідності.", "H4": "", "H1": "https://www.tradingview.com/x/rZ7HYEqO/", "m15": "https://www.tradingview.com/x/3wTpjpZE/", "m5": ""}, {"№": "Trade №39", "Дата, час": "07/09/2026", "Сесія": "New-York", "Пара": "EURUSD", "Сетап": "H1M5", "Позиція": "Long", "Ризик, %": "0.5%", "RR": -1, "За планом": "No", "Multi-select": "STB/BTS", "Примітки": "На продовження тренду в Лонг.", "H4": "", "H1": "https://www.tradingview.com/x/wjTz6bh7/", "m15": "https://www.tradingview.com/x/CPdLKsHq/", "m5": ""}, {"№": "Trade №38", "Дата, час": "07/09/2026", "Сесія": "London", "Пара": "EURUSD", "Сетап": "H1M15", "Позиція": "Short", "Ризик, %": "0.25%", "RR": -1, "За планом": "No", "Multi-select": "STB/BTS", "Примітки": "Проти глобального тренду. Після зняття Хай Азії поставив у Шорт на зняття лоу Азії.", "H4": "", "H1": "https://www.tradingview.com/x/pLKvp6Cz/", "m15": "https://www.tradingview.com/x/wB0hnks4/", "m5": ""}, {"№": "Trade №37", "Дата, час": "04/09/2026", "Сесія": "London", "Пара": "EURUSD", "Сетап": "H1M5", "Позиція": "Long", "Ризик, %": "0.25%", "RR": -1, "За планом": "No", "Multi-select": "STB/BTS", "Примітки": "ХТФ тренд лонговий, лонгував на продовження тренду, але ціна пішла на ще глибшу корекцію.", "H4": "", "H1": "https://www.tradingview.com/x/sKFgYz53/", "m15": "", "m5": "https://www.tradingview.com/x/OnvDiQ9q/"}, {"№": "Trade №36", "Дата, час": "03/09/2026", "Сесія": "New-York", "Пара": "EURUSD", "Сетап": "H1M5", "Позиція": "Short", "Ризик, %": "0.25%", "RR": "-1", "За планом": "No", "Тейк (автоматично)": "No", "Прибуток": "-0.25%", "Multi-select": "STB/BTS", "Примітки": "Після зняття важливої ліквідності ціна пішла на корекцію і я зайшов проти тренду.", "H4": "", "H1": "https://www.tradingview.com/x/wnoQ0kbc/", "m15": "", "m5": "https://www.tradingview.com/x/No46i6F4/"}, {"№": "Trade №35", "Дата, час": "03/09/2026", "Сесія": "New-York", "Пара": "EURUSD", "Сетап": "H1M5", "Позиція": "Long", "Ризик, %": "0.25%", "RR": "5.8", "За планом": "No", "Тейк (автоматично)": "Yes", "Прибуток": "1.45%", "Multi-select": "OB", "Примітки": "Індюсмент+фвг м15, сетап ОБ м5", "H4": "", "H1": "https://www.tradingview.com/x/aIIjXTBe/", "m15": "", "m5": "https://www.tradingview.com/x/KeWbg5YL/"}, {"№": "Trade №34", "Дата, час": "03/09/2026", "Сесія": "London", "Пара": "EURUSD", "Сетап": "H1M5", "Позиція": "Long", "Ризик, %": "0.25%", "RR": "-1", "За планом": "No", "Тейк (автоматично)": "No", "Прибуток": "-0.25%", "Multi-select": "STB/BTS", "Примітки": "Заходив від ОБ на продовження тренду, але ціна пішла на глибшу корекцію.", "H4": "", "H1": "https://www.tradingview.com/x/EqYE5UI0/", "m15": "https://www.tradingview.com/x/L10DhIXB/", "m5": ""}, {"№": "Trade №33", "Дата, час": "02/09/2026", "Сесія": "New-York", "Пара": "EURUSD", "Сетап": "H1M5", "Позиція": "Short", "Ризик, %": "0.25%", "RR": "-1", "За планом": "No", "Тейк (автоматично)": "No", "Прибуток": "-0.25%", "Multi-select": "FVG", "Примітки": "фвг Н1+індюсмент м15", "H4": "", "H1": "https://www.tradingview.com/x/dm4h7z1A/", "m15": "", "m5": "https://www.tradingview.com/x/EVv49KDF/"}, {"№": "Trade №32", "Дата, час": "01/09/2026", "Сесія": "New-York", "Пара": "EURUSD", "Сетап": "H1M5", "Позиція": "Short", "Ризик, %": "0.25%", "RR": "-1", "За планом": "No", "Тейк (автоматично)": "No", "Прибуток": "-0.25%", "Multi-select": "STB/BTS", "Примітки": "фвг+індюсмент м5", "H4": "", "H1": "https://www.tradingview.com/x/lnxmxrgd/", "m15": "", "m5": "https://www.tradingview.com/x/iNPaaqJO/"}, {"№": "Trade №31", "Дата, час": "31/08/2026", "Сесія": "New-York", "Пара": "EURUSD", "Сетап": "H1M15", "Позиція": "Long", "Ризик, %": "0.25%", "RR": "2", "За планом": "No", "Тейк (автоматично)": "Yes", "Прибуток": "0.5%", "Multi-select": "STB/BTS", "Примітки": "Фвг+індюсмент на м15", "H4": "", "H1": "https://www.tradingview.com/x/4N0e4bjt/", "m15": "https://www.tradingview.com/x/CKCxiDE6/", "m5": ""}, {"№": "Trade №30", "Дата, час": "31/08/2026", "Сесія": "London", "Пара": "EURUSD", "Сетап": "H1M5", "Позиція": "Long", "Ризик, %": "0.25%", "RR": "-1", "За планом": "No", "Тейк (автоматично)": "No", "Прибуток": "-0.25%", "Multi-select": "STB/BTS", "Примітки": "Після СМТ з ДХУ, Продовження Лонгового тренду.", "H4": "", "H1": "https://www.tradingview.com/x/hp5uTpa2/", "m15": "", "m5": "https://www.tradingview.com/x/HRwWFqrA/"}, {"№": "Trade №29", "Дата, час": "25/08/2026", "Сесія": "London", "Пара": "EURUSD", "Сетап": "H1M5", "Позиція": "Long", "Ризик, %": "0.25%", "RR": "2.7", "За планом": "No", "Тейк (автоматично)": "Yes", "Прибуток": "0.675%", "Multi-select": "FVG", "Примітки": "Ціна зняла Лоу Азії, я зайшов в лонг від фвг з таргетом на зняття Хай Азії.", "H4": "", "H1": "https://www.tradingview.com/x/d6QUzxg0/", "m15": "", "m5": "https://www.tradingview.com/x/HeKIN6zc/"}, {"№": "Trade №28", "Дата, час": "24/08/2026 → 25/08/2026", "Сесія": "New-York", "Пара": "EURUSD", "Сетап": "H1M5", "Позиція": "Short", "Ризик, %": "0.25%", "RR": "2", "За планом": "No", "Тейк (автоматично)": "Yes", "Прибуток": "0.5%", "Multi-select": "STB/BTS", "Примітки": "Після тесту ФВГ отримали реакцію і продовжили тренд в шорт.", "H4": "", "H1": "https://www.tradingview.com/x/oEOPsLUC/", "m15": "", "m5": "https://www.tradingview.com/x/hq5zm5FI/"}, {"№": "Trade №27", "Дата, час": "21/08/2026", "Сесія": "New-York", "Пара": "EURUSD", "Сетап": "H1M5", "Позиція": "Long", "Ризик, %": "0.25%", "RR": "-1", "За планом": "No", "Тейк (автоматично)": "No", "Прибуток": "-0.25%", "Multi-select": "FVG, STB/BTS", "Примітки": "Після зняття Денної ліквідності Хай, ціна отримала корекцію, де я і зайшов у Лонг, але корекція глибока і я отримав Стоп.", "H4": "", "H1": "https://www.tradingview.com/x/AtA8Mi4q/", "m15": "", "m5": "https://www.tradingview.com/x/U75dHype/"}, {"№": "Trade №26", "Дата, час": "21/08/2026", "Сесія": "London", "Пара": "EURUSD", "Сетап": "H1M5", "Позиція": "Long", "Ризик, %": "0.5%", "RR": "2.4", "За планом": "No", "Тейк (автоматично)": "Yes", "Прибуток": "1.2%", "Multi-select": "STB/BTS", "Примітки": "Затягний ренж зі свіпом знижу і польотом в лонг.", "H4": "", "H1": "https://www.tradingview.com/x/kgd7pZrg/", "m15": "", "m5": "https://www.tradingview.com/x/p8DSfhk3/"}, {"№": "Trade №25", "Дата, час": "19/08/2026", "Сесія": "New-York", "Пара": "EURUSD", "Сетап": "H1M5", "Позиція": "Short", "Ризик, %": "0.25%", "RR": "-1", "За планом": "No", "Тейк (автоматично)": "No", "Прибуток": "-0.25%", "Multi-select": "FVG, STB/BTS", "Примітки": "Проти тренду, думав що корекція буде глибшою, а вона коротка.", "H4": "", "H1": "https://www.tradingview.com/x/VmgdQZYN/", "m15": "", "m5": "https://www.tradingview.com/x/rsn7H11Z/"}, {"№": "Trade №24", "Дата, час": "19/08/2026", "Сесія": "London", "Пара": "EURUSD", "Сетап": "H1M5", "Позиція": "Long", "Ризик, %": "0.25%", "RR": "2", "За планом": "No", "Тейк (автоматично)": "Yes", "Прибуток": "0.5%", "Multi-select": "FVG, OF", "Примітки": "Продовження тренду до денної ліквідності.", "H4": "", "H1": "https://www.tradingview.com/x/GQCnTG2T/", "m15": "", "m5": "https://www.tradingview.com/x/JjfM58dy/"}, {"№": "Trade №23", "Дата, час": "18/08/2026", "Сесія": "New-York", "Пара": "EURUSD", "Сетап": "H1M5", "Позиція": "Short", "Ризик, %": "0.25%", "RR": "0.7", "За планом": "No", "Тейк (автоматично)": "Yes", "Прибуток": "0.175%", "Multi-select": "STB/BTS", "Примітки": "Після зняття денної Хай ліквідності, поставив Шорт", "H4": "", "H1": "https://www.tradingview.com/x/Wk7Ds1xq/", "m15": "", "m5": "https://www.tradingview.com/x/luYnC7yJ/"}, {"№": "Trade №22", "Дата, час": "18/08/2026", "Сесія": "London", "Пара": "EURUSD", "Сетап": "H1M5", "Позиція": "Long", "Ризик, %": "0.25%", "RR": "2", "За планом": "No", "Тейк (автоматично)": "Yes", "Прибуток": "0.5%", "Multi-select": "OB, STB/BTS", "Примітки": "Франкфурт зняв Лоу Азії, я поставив Лонг на зняття Хай Азії, отримав Тейк.", "H4": "", "H1": "https://www.tradingview.com/x/6VHHh8JX/", "m15": "https://www.tradingview.com/x/ZhXoTvlM/", "m5": ""}, {"№": "Trade №21", "Дата, час": "17/08/2026", "Сесія": "New-York", "Пара": "EURUSD", "Сетап": "H1M5", "Позиція": "Long", "Ризик, %": "0.25%", "RR": "-1", "За планом": "No", "Тейк (автоматично)": "No", "Прибуток": "-0.25%", "Multi-select": "FVG, OB", "Примітки": "Знову пересвіп", "H4": "", "H1": "https://www.tradingview.com/x/NJpoZgSV/", "m15": "", "m5": "https://www.tradingview.com/x/e2HpgoZy/"}, {"№": "Trade №20", "Дата, час": "17/08/2026", "Сесія": "New-York", "Пара": "EURUSD", "Сетап": "H1M5", "Позиція": "Long", "Ризик, %": "0.25%", "RR": "-1", "За планом": "No", "Тейк (автоматично)": "No", "Прибуток": "-0.25%", "Multi-select": "OB, SMT", "Примітки": "Пересвіп", "H4": "", "H1": "https://www.tradingview.com/x/0NNz8WzP/", "m15": "", "m5": "https://www.tradingview.com/x/QKq5SWjy/"}, {"№": "Trade №19", "Дата, час": "14/08/2026", "Сесія": "New-York", "Пара": "EURUSD", "Сетап": "H1M5", "Позиція": "Short", "Ризик, %": "0.25%", "RR": "1.6", "За планом": "No", "Тейк (автоматично)": "Yes", "Прибуток": "0.4%", "Multi-select": "OB", "Примітки": "За другим разом получилось реалізувати реакцію від зняття денної ліквідності.", "H4": "", "H1": "https://www.tradingview.com/x/chAxStVS/", "m15": "", "m5": "https://www.tradingview.com/x/E2hHbTaD/"}, {"№": "Trade №18", "Дата, час": "14/08/2026", "Сесія": "New-York", "Пара": "EURUSD", "Сетап": "H1M5", "Позиція": "Short", "Ризик, %": "0.25%", "RR": "-1", "За планом": "No", "Тейк (автоматично)": "No", "Прибуток": "-0.25%", "Multi-select": "OB", "Примітки": "Після зняття денної ліквідності розраховував на реакцію, але не сталось. На DXY було видно, що не потрібно заходити в угоду.", "H4": "", "H1": "https://www.tradingview.com/x/KSaiKoIo/", "m15": "", "m5": "https://www.tradingview.com/x/MGarGN40/"}, {"№": "Trade №17", "Дата, час": "13/08/2026", "Сесія": "New-York", "Пара": "EURUSD", "Сетап": "H1M5", "Позиція": "Long", "Ризик, %": "0.25%", "RR": "1.7", "За планом": "No", "Тейк (автоматично)": "Yes", "Прибуток": "0.425%", "Multi-select": "OB", "Примітки": "Заходив від вечірнього межування Євро, розраховував на розворот, що і отримав, є Тейк.", "H4": "", "H1": "https://www.tradingview.com/x/MJoh9roQ/", "m15": "https://www.tradingview.com/x/Qzruw1VV/", "m5": ""}, {"№": "Trade №16", "Дата, час": "13/08/2026", "Сесія": "New-York", "Пара": "EURUSD", "Сетап": "H1M5", "Позиція": "Short", "Ризик, %": "0.25%", "RR": "-1", "За планом": "No", "Тейк (автоматично)": "No", "Прибуток": "-0.25%", "Multi-select": "FVG", "Примітки": "Пересвіпнуло і пішло в сторону тейка.", "H4": "", "H1": "https://www.tradingview.com/x/hsjknsLk/", "m15": "", "m5": "https://www.tradingview.com/x/GgiDlNEH/"}, {"№": "Trade №15", "Дата, час": "13/08/2026", "Сесія": "London", "Пара": "EURUSD", "Сетап": "H1M5", "Позиція": "Long", "Ризик, %": "0.25%", "RR": "2", "За планом": "No", "Тейк (автоматично)": "Yes", "Прибуток": "0.5%", "Multi-select": "OB", "Примітки": "Дивився по SMT DXY в сторону глобального тренду в Лонг.", "H4": "", "H1": "https://www.tradingview.com/x/urnxboU5/", "m15": "", "m5": "https://www.tradingview.com/x/UHAFN2Ot/"}, {"№": "Trade №14", "Дата, час": "13/08/2026", "Сесія": "New-York", "Пара": "EURUSD", "Сетап": "m15m5", "Позиція": "Short", "Ризик, %": "0.25%", "RR": "-1", "За планом": "No", "Тейк (автоматично)": "No", "Прибуток": "-0.25%", "Multi-select": "OB", "Примітки": "Після першого дотику ліквідності зайшов в Шорт в сторону корекції, але її не було.", "H4": "", "H1": "https://www.tradingview.com/x/AG8LCrXB/", "m15": "", "m5": "https://www.tradingview.com/x/6DTX7w9Z/"}, {"№": "Trade №13", "Дата, час": "12/08/2026 → 13/08/2026", "Сесія": "New-York", "Пара": "EURUSD", "Сетап": "H1M5", "Позиція": "Long", "Ризик, %": "0.25%", "RR": "-1", "За планом": "No", "Тейк (автоматично)": "No", "Прибуток": "-0.25%", "Multi-select": "OB", "Примітки": "Розраховував на рух в Лонг по глобальному тренду, але був свіп ліквідності і отримав стоп. ", "H4": "", "H1": "https://www.tradingview.com/x/fW19Hzpi/", "m15": "https://www.tradingview.com/x/0Aug4bmY/", "m5": ""}, {"№": "Trade №12", "Дата, час": "12/08/2026", "Сесія": "New-York", "Пара": "EURUSD", "Сетап": "m15m5", "Позиція": "Short", "Ризик, %": "0.25%", "RR": "2", "За планом": "No", "Тейк (автоматично)": "Yes", "Прибуток": "0.5%", "Multi-select": "OB, OF", "Примітки": "Після сильного імпульсу в Лонг, зайшов на корекцію в Шорт на другому свінгу.", "H4": "", "H1": "https://www.tradingview.com/x/W8DYEUmC/", "m15": "", "m5": "https://www.tradingview.com/x/Wtwbl9Gp/"}, {"№": "Trade №11", "Дата, час": "12/08/2026", "Сесія": "London", "Пара": "EURUSD", "Сетап": "H1M5", "Позиція": "Long", "Ризик, %": "0.5%", "RR": "-1", "За планом": "No", "Тейк (автоматично)": "No", "Прибуток": "-0.5%", "Multi-select": "OB", "Примітки": "За трендом в Лонг, ціна пересвіпнула.", "H4": "", "H1": "https://www.tradingview.com/x/cQMP7wNH/", "m15": "https://www.tradingview.com/x/tFiu2fgO/", "m5": ""}, {"№": "Trade №10", "Дата, час": "11/08/2026 → 11/08/2026", "Сесія": "New-York", "Пара": "EURUSD", "Сетап": "H1M5", "Позиція": "Short", "Ризик, %": "0.5%", "RR": "-1", "За планом": "No", "Тейк (автоматично)": "No", "Прибуток": "-0.5%", "Multi-select": "OB", "Примітки": "За трендом в Шорт, але ціна розвернулась в Лонг.", "H4": "", "H1": "https://www.tradingview.com/x/gUDIhV7k/", "m15": "https://www.tradingview.com/x/ZrAoQu6J/", "m5": ""}, {"№": "Trade №9", "Дата, час": "11/08/2026", "Сесія": "New-York", "Пара": "EURUSD", "Сетап": "H1M5", "Позиція": "Short", "Ризик, %": "0.5%", "RR": "-1", "За планом": "No", "Тейк (автоматично)": "No", "Прибуток": "-0.5%", "Multi-select": "OB", "Примітки": "Залокальним трендом в шорт, після зняття ліквідності азії.", "H4": "", "H1": "https://www.tradingview.com/x/3xh7Ge5W/", "m15": "", "m5": "https://www.tradingview.com/x/wGUSnYLV/"}, {"№": "Trade №8", "Дата, час": "11/08/2026", "Сесія": "New-York", "Пара": "EURUSD", "Сетап": "H1M5", "Позиція": "Short", "Ризик, %": "0.5%", "RR": "-1", "За планом": "No", "Тейк (автоматично)": "No", "Прибуток": "-0.5%", "Multi-select": "OB", "Примітки": "Глобальна корекція, очікував біль глибоку, а вона в цей момент вирішила розвернути ціну.", "H4": "", "H1": "https://www.tradingview.com/x/FyEevz35/", "m15": "https://www.tradingview.com/x/C3BqfKF5/", "m5": ""}, {"№": "Trade №7", "Дата, час": "10/08/2026", "Сесія": "New-York", "Пара": "EURUSD", "Сетап": "H1M5", "Позиція": "Long", "Ризик, %": "0.5%", "RR": "-1", "За планом": "No", "Тейк (автоматично)": "No", "Прибуток": "-0.5%", "Multi-select": "FVG", "Примітки": "На корекції в Лонг, але корекція пішла ще нижче.", "H4": "", "H1": "https://www.tradingview.com/x/f9bO8wcF/", "m15": "", "m5": "https://www.tradingview.com/x/OaIIGXzX/"}, {"№": "Trade №6", "Дата, час": "10/08/2026", "Сесія": "London", "Пара": "EURUSD", "Сетап": "H1M15", "Позиція": "Long", "Ризик, %": "0.5%", "RR": "-1", "За планом": "No", "Тейк (автоматично)": "No", "Прибуток": "-0.5%", "Multi-select": "FVG", "Примітки": "На кореції заходив на продовження тренду в Лонг. Але ціна пішла на глибшу корекцію, отримав Стоп.", "H4": "", "H1": "https://www.tradingview.com/x/WYl6r237/", "m15": "https://www.tradingview.com/x/gq4CVf71/", "m5": ""}, {"№": "Trade №5", "Дата, час": "07/08/2026", "Сесія": "London", "Пара": "EURUSD", "Сетап": "H1M5", "Позиція": "Long", "Ризик, %": "0.5%", "RR": "2", "За планом": "No", "Тейк (автоматично)": "Yes", "Прибуток": "1%", "Multi-select": "OB", "Примітки": "По тренду, після зняття лоу азії ціна пішла знімати хай.", "H4": "", "H1": "https://www.tradingview.com/x/rDkTnW3X/", "m15": "", "m5": "https://www.tradingview.com/x/7sJ8xnGk/"}, {"№": "Trade №4", "Дата, час": "06/08/2026", "Сесія": "New-York", "Пара": "EURUSD", "Сетап": "H1M15", "Позиція": "Short", "Ризик, %": "0.5%", "RR": "2", "За планом": "No", "Тейк (автоматично)": "Yes", "Прибуток": "1%", "Multi-select": "BPR", "Примітки": "На відкритті НюЙорка зайшов по тренду від ОБ Лондона", "H4": "", "H1": "https://www.tradingview.com/x/7B0vnfF8/", "m15": "https://www.tradingview.com/x/TiEVPvl4/", "m5": ""}, {"№": "Trade №3", "Дата, час": "03/08/2026 → 05/08/2026", "Сесія": "New-York", "Пара": "EURUSD", "Сетап": "H1M15", "Позиція": "Short", "Ризик, %": "1.0%", "RR": "-1", "За планом": "No", "Тейк (автоматично)": "No", "Прибуток": "-1%", "Multi-select": "Gap", "Примітки": "Проти тренду, він був лонговий, а я зайшов у шорт.", "H4": "https://www.tradingview.com/x/K5aoxy3K/", "H1": "", "m15": "https://www.tradingview.com/x/urq6LMtN/", "m5": ""}, {"№": "Trade №2", "Дата, час": "04/08/2026", "Сесія": "New-York", "Пара": "EURUSD", "Сетап": "H1M5", "Позиція": "Short", "Ризик, %": "0.5%", "RR": "-1", "За планом": "No", "Тейк (автоматично)": "No", "Прибуток": "-0.5%", "Multi-select": "I-FVG", "Примітки": "Ціна зняла Хай Азії, розраховував що зніме Лоу, але не зняла.", "H4": "", "H1": "https://www.tradingview.com/x/UNqzaDzA/", "m15": "", "m5": "https://www.tradingview.com/x/qtcfMf9M/"}, {"№": "Trade №1", "Дата, час": "31/07/2026 → 31/07/2026", "Сесія": "New-York", "Пара": "EURUSD", "Сетап": "H1M15", "Позиція": "Short", "Ризик, %": "0.5%", "RR": "2", "За планом": "No", "Тейк (автоматично)": "Yes", "Прибуток": "1%", "Multi-select": "OB", "Примітки": "Проти тренду, на корекціїї від фвг D1, дуже ризикова угода", "H4": "", "H1": "https://www.tradingview.com/x/WxB5mdjE/", "m15": "https://www.tradingview.com/x/Z9oQzvRD/", "m5": ""}]
+
+
+</script>
+<script>
+let trades=[]; const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+function parseSeedRow(x){let rr=parseFloat(String(x['RR']).replace(',','.'))||0; return {id:x['№'],date:x['Дата, час'],session:x['Сесія'],pair:x['Пара'],model:x['Multi-select']||x['Сетап'],side:x['Позиція'],risk:parseFloat(String(x['Ризик, %']).replace('%','').replace(',','.'))||0,r:rr,result:rr>0?'TP':rr<0?'SL':'BE',notes:x['Примітки']||'',trend:'',sweep:'',grade:'',liquidity:'',before:x['H1']||x['H4']||'',after:x['m5']||x['m15']||'',h4:x['H4']||'',h1:x['H1']||'',m15:x['m15']||'',m5:x['m5']||''}}
+async function init(){let saved=null;for(let k of ['tjv62','tjv62','tjv34','tjv33','tjv32','tjv31','tjv30','tjv29','tjv28','tjv27','tjv26','tjv25','tjv24','tjv23','tjv22']){let v=localStorage.getItem(k);if(v){saved=v;break}}if(saved){try{trades=JSON.parse(saved)}catch(e){trades=[]}}if(!trades.length){try{let seed=JSON.parse(document.getElementById('seed-data').textContent);trades=seed.map(parseSeedRow).reverse()}catch(e){console.error(e);trades=[]}}save();render()}
+function setTodayDate(){let el=document.querySelector("#tradeForm input[name='date']");if(!el)return;let d=new Date(),y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');if(!el.value)el.value=`${y}-${m}-${day}`;if(el.showPicker)el.addEventListener('click',()=>{try{el.showPicker()}catch(e){}})}
+function save(){localStorage.setItem('tjv62',JSON.stringify(trades))}
+function stats(arr=trades){let done=arr.filter(t=>['TP','SL','BE'].includes(t.result));let wins=done.filter(t=>+t.r>0);let losses=done.filter(t=>+t.r<0);let sum=done.reduce((a,t)=>a+(+t.r||0),0);let income=done.reduce((a,t)=>a+((+t.r||0)*(+t.risk||0)),0);let wr=done.length?wins.length/done.length*100:0;let gp=wins.reduce((a,t)=>a+(+t.r||0),0),gl=Math.abs(losses.reduce((a,t)=>a+(+t.r||0),0));return{n:done.length,w:wins.length,l:losses.length,sum,income,wr,pf:gl?gp/gl:0,exp:done.length?sum/done.length:0}}
+function render(){let s=stats();let vals=[['Угоди',s.n],['Winrate',s.wr.toFixed(1)+'%'],['Сумарний R',(s.sum>=0?'+':'')+s.sum.toFixed(1)+'R'],['Середній R',s.exp.toFixed(2)+'R'],['Дохід',(s.income>=0?'+':'')+s.income.toFixed(2)+'%']];
+let metricInfo={
+'Угоди':['Кількість завершених угод, які входять у статистику: TP, SL та BE.','N = TP + SL + BE'],
+'Winrate':['Відсоток прибуткових угод серед усіх завершених угод.','WR = прибуткові / усі × 100%'],
+'Сумарний R':['Загальний результат усіх завершених угод у R.','Σ R усіх угод'],
+'Середній R':['Середній результат однієї завершеної угоди.','Сер. R = Сумарний R / N'],
+'Дохід':['Сумарний результат у % з урахуванням ризику кожної угоди.','Дохід = Σ (R × ризик %)']
+};
+$('#metrics').innerHTML=vals.map((v,i)=>`<div class='card metric'><span class='muted'>${v[0]}</span><b>${v[1]}</b><button type='button' class='metric-help' data-mi='${i}'>?</button><div class='metric-popover' data-mp='${i}'><b>${v[0]}</b>${metricInfo[v[0]][0]}<span class='formula'>${metricInfo[v[0]][1]}</span></div></div>`).join('');
+$$('.metric-help').forEach(btn=>btn.onclick=e=>{e.stopPropagation();let pop=$(`.metric-popover[data-mp="${btn.dataset.mi}"]`),open=pop.classList.contains('open');$$('.metric-popover').forEach(x=>x.classList.remove('open'));if(!open)pop.classList.add('open')});
+let eq=0, series=trades.filter(t=>['TP','SL','BE'].includes(t.result)).map(t=>eq+=(+t.r||0));let rawMin=Math.min(0,...series),rawMax=Math.max(1,...series);let step=Math.max(1,Math.ceil((rawMax-rawMin)/5));let min=Math.floor(rawMin/step)*step,max=Math.ceil(rawMax/step)*step;if(max===min)max=min+step;let range=max-min;let ticks=[];for(let v=min;v<=max+.0001;v+=step)ticks.push(v);let pct=v=>(v-min)/range*100;let grid=ticks.map(v=>`<div class='chart-grid-line' style='bottom:${pct(v)}%'></div>`).join('');let labels=ticks.map(v=>`<span style='bottom:${pct(v)}%'>${v>0?'+':''}${v}R</span>`).join('');let bars=series.map((v,i)=>`<div class='chart-col'><div class='chart-bar' title='Угода ${i+1}: ${v>=0?'+':''}${v.toFixed(1)}R' style='height:${Math.max(2,pct(v))}%'></div></div>`).join('');$('#equity').innerHTML=`<div class='chart-grid'>${grid}</div><div class='chart-y'>${labels}</div>${min<0&&max>0?`<div class='chart-zero' style='bottom:calc(26px + ${(0-min)/range*176}px)'></div>`:''}<div class='chart-bars'>${bars}</div><div class='chart-xlabel'>угоди →</div>`;
+$('#breakdown').innerHTML=groupHTML('Сесія','session')+groupHTML('Напрямок','side'); renderAdvice(); renderRows(); renderАналітика(); fillSessions()}
+function group(key){let m={};trades.forEach(t=>{let k=t[key]||'Unknown';(m[k]??=[]).push(t)});return m}function groupHTML(title,key){let g=group(key),mx=Math.max(1,...Object.values(g).map(a=>a.length));let tones=key==='session'?{'New-York':'tone-blue','London':'tone-violet','Asia':'tone-orange'}:{'Long':'tone-green','Short':'tone-orange'};return `<div class='break-section'><div class='break-title'>${title}</div>${Object.entries(g).map(([k,a])=>{let s=stats(a),cls=s.sum>=0?'good':'bad',tone=tones[k]||'tone-blue';return `<div class='break-item'><div class='break-top'><span class='break-name'>${k}</span><span class='break-stats'><span class='stat-chip'>${a.length} угод</span><span class='stat-chip'>${s.wr.toFixed(0)}% WR</span><span class='stat-chip ${cls}'>${s.sum>=0?'+':''}${s.sum.toFixed(1)}R</span></span></div><div class='break-bar ${tone}'><i style='width:${a.length/mx*100}%'></i></div></div>`}).join('')}</div>`}
+function parseTradeDate(v){if(!v)return null;let x=String(v).trim().split(/[ ,T]/)[0];if(/^\d{4}-\d{2}-\d{2}$/.test(x)){let [y,m,d]=x.split('-').map(Number);return new Date(y,m-1,d)}if(/^\d{2}\/\d{2}\/\d{4}$/.test(x)){let [d,m,y]=x.split('/').map(Number);return new Date(y,m-1,d)}return null}
+const uaMonths=['Січень','Лютий','Березень','Квітень','Травень','Червень','Липень','Серпень','Вересень','Жовтень','Листопад','Грудень'];
+function monthKey(t){let d=parseTradeDate(t.date);return d?`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`:'0000-00'}
+function monthTitle(key){if(key==='0000-00')return 'Без дати';let [y,m]=key.split('-').map(Number);return `${uaMonths[m-1]} ${y}`}
+function badgeClass(prefix,v){return prefix+'-'+String(v||'other').toLowerCase().replaceAll('/','-').replaceAll(' ','-')}function tradeTable(a){return `<div class='card tablewrap month-table'><table><thead><tr><th>#</th><th>Дата</th><th>Пара</th><th>Сесія</th><th>Напрямок</th><th>Модель</th><th>R</th><th>Результат</th><th>Нотатки</th></tr></thead><tbody>${[...a].reverse().map(t=>{let rv=+t.r||0;return `<tr class='trade-row' data-trade-index='${trades.indexOf(t)}'><td><span class='trade-id'>${t.id||'#'+(trades.indexOf(t)+1)}</span></td><td class='date-cell'>${t.date||''}</td><td><span class='pair-badge'>${t.pair||''}</span></td><td><span class='session-badge ${badgeClass('session',t.session)}'>${t.session||''}</span></td><td><span class='side-badge ${badgeClass('side',t.side)}'>${t.side||''}</span></td><td><span class='model-badge ${['OB','FVG','STB/BTS'].includes(t.model)?badgeClass('model',t.model):'model-other'}'>${t.model||''}</span></td><td class='${rv>0?'r-pos':rv<0?'r-neg':'r-zero'}'>${rv>0?'+':''}${rv}R</td><td><span class='result-badge ${badgeClass('result',t.result)}'>${t.result||''}</span></td><td class='notes-cell' title='${(t.notes||'').replaceAll("'",'')}'>${(t.notes||'').slice(0,58)}</td></tr>`}).join('')}</tbody></table></div>`}
+function renderRows(){let fs=$('#fSession').value,fd=$('#fSide').value,fr=$('#fResult').value;let a=trades.filter(t=>(!fs||t.session==fs)&&(!fd||t.side==fd)&&(!fr||t.result==fr));let months={};a.forEach(t=>(months[monthKey(t)]??=[]).push(t));let keys=Object.keys(months).sort().reverse();$('#rows').innerHTML=keys.length?keys.map((k,i)=>{let arr=months[k],st=stats(arr);return `<div class='month-folder ${i===0?'open':''}'><button class='month-head' type='button'><span><span class='month-arrow'>›</span><b>${monthTitle(k)}</b></span><span class='month-summary'><span class='month-chip'>${arr.length} угод</span><span class='month-chip ${st.sum>=0?'pos':'neg'}'>${st.sum>=0?'+':''}${st.sum.toFixed(1)}R</span><span class='month-chip'>${st.wr.toFixed(1)}% WR</span><span class='month-chip income-chip ${st.income>=0?'pos':'neg'}'>${st.income>=0?'+':''}${st.income.toFixed(2)}% дохід</span></span></button><div class='month-body'>${tradeTable(arr)}</div></div>`}).join(''):`<div class='card muted'>Угод за цими фільтрами немає.</div>`;$$('.month-head').forEach(h=>h.onclick=()=>h.parentElement.classList.toggle('open'));$$('.trade-row').forEach(r=>r.onclick=()=>openTradeDetail(+r.dataset.tradeIndex))}
+function esc(v){return String(v??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;')}
+function openImageLightbox(src){const box=document.getElementById('imageLightbox'),img=document.getElementById('lightboxImage');if(!box||!img||!src)return;img.src=src;box.classList.add('open')}
+function closeImageLightbox(){const box=document.getElementById('imageLightbox'),img=document.getElementById('lightboxImage');if(box)box.classList.remove('open');if(img)img.src=''}
+$('#imageLightbox').onclick=e=>{if(e.target.id==='imageLightbox'||e.target.id==='lightboxImage')closeImageLightbox()};
+function directShot(url){return tradingViewPreview(url)||url}
+function shotCard(title,url){if(!url)return `<div class='shot'><div class='shot-head'><b>${title}</b></div><div class='shot-frame empty-shot'>Скріншот не додано</div></div>`;let img=directShot(url);return `<div class='shot'><div class='shot-head'><b>${title}</b><a class='shot-link' href='${esc(img)}' target='_blank' rel='noopener'>На весь екран ↗</a></div><div class='shot-frame'><img src='${esc(img)}' alt='${title}' loading='lazy' onclick="openImageLightbox(this.src)" onerror="this.parentElement.innerHTML='<div class=&quot;empty-shot&quot;>Не вдалося завантажити скрін</div>'"></div></div>`}
+
+function multiShotDetail(title,arr,fallback,defaultTf){
+  let shots=Array.isArray(arr)?arr.filter(x=>x&&(x.data||x.url)):[];
+  if(!shots.length&&fallback){let isTv=validTradingViewUrl(fallback);shots=[{tf:defaultTf,data:isTv?'':fallback,url:isTv?fallback:''}]}
+  return `<div class="detail-notes"><span class="muted">${title}</span>${shots.length?`<div class="detail-shot-grid">${shots.map(s=>`<div class="detail-shot-mini">${s.data?`<img src="${esc(s.data)}" alt="${esc(s.tf||defaultTf)}" onclick="openImageLightbox(this.src)">`:s.url?`<a class="detail-tv-card" href="${esc(s.url)}" target="_blank" rel="noopener"><b>TradingView</b><small>Відкрити графік ↗</small></a>`:''}<span>${esc(s.tf||defaultTf)}</span></div>`).join('')}</div>`:`<div style="margin-top:7px">Немає скрінів</div>`}</div>`;
+}
+function openTradeDetail(i){let t=trades[i];if(!t)return;let rv=+t.r||0;let links=[['H4',t.h4],['H1',t.h1],['M15',t.m15],['M5',t.m5]].filter(x=>x[1]);let before=t.before||t.h1||t.h4||'';let after=t.after||t.m5||t.m15||'';$('#tradeDetailContent').innerHTML=`<div class='detail-head'><div class='detail-title'><h3>${esc(t.id||'Угода')}</h3><span class='result-badge ${badgeClass('result',t.result)}'>${esc(t.result)}</span><span class='${rv>0?'r-pos':rv<0?'r-neg':'r-zero'}'>${rv>0?'+':''}${rv}R</span></div><button class='close-modal' onclick='closeTradeDetail()'>×</button></div><div class='detail-body'><div class='detail-grid'><div class='detail-box'><span>Дата</span><b>${esc(t.date||'—')}</b></div><div class='detail-box'><span>Пара</span><b>${esc(t.pair||'—')}</b></div><div class='detail-box'><span>Сесія</span><b>${esc(t.session||'—')}</b></div><div class='detail-box'><span>Напрямок</span><b>${esc(t.side||'—')}</b></div><div class='detail-box'><span>Модель</span><b>${esc(t.model||'—')}</b></div><div class='detail-box'><span>Ризик</span><b>${esc(t.risk??'—')}%</b></div><div class='detail-box'><span>HTF тренд</span><b>${esc(t.trend||'—')}</b></div><div class='detail-box'><span>Зняття ліквідності</span><b>${esc(t.sweep||'—')}</b></div></div><div class='detail-notes'><span class='muted'>Нотатки</span><div style='margin-top:7px'>${esc(t.notes||'Нотаток немає')}</div></div>${multiShotDetail('Скрін ДО',t.shotsBefore,before,'H1')}${multiShotDetail('Скрін ПІСЛЯ',t.shotsAfter,after,'M5')}${links.length?`<div class='detail-links'>${links.map(([n,u])=>`<a href='${esc(u)}' target='_blank' rel='noopener'>${n} ↗</a>`).join('')}</div>`:''}</div>`;$('#tradeDetail').classList.add('open')}
+function closeTradeDetail(){$('#tradeDetail').classList.remove('open')}
+$('#tradeDetail').onclick=e=>{if(e.target.id==='tradeDetail')closeTradeDetail()};document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeTradeDetail();closeImageLightbox()}});
+
+const CAL_KEY='tj_calendar_api_v41';
+let calRange=7,calRaw=[];
+function localISO(d){let y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');return `${y}-${m}-${day}`}
+function calConfig(){try{return JSON.parse(localStorage.getItem(CAL_KEY)||'{}')}catch(e){return {}}}
+function impactClass(v){let s=String(v||'').toLowerCase();if(s.includes('high')||s==='3')return'high';if(s.includes('medium')||s.includes('moderate')||s==='2')return'medium';return'low'}
+function currencyFromCountry(c){
+ let raw=String(c||'').trim(),x=raw.toLowerCase();
+ let map={
+ 'united states':'USD','usa':'USD','us':'USD','united states of america':'USD',
+ 'euro area':'EUR','eurozone':'EUR','european union':'EUR','germany':'EUR','france':'EUR','italy':'EUR','spain':'EUR','netherlands':'EUR','belgium':'EUR','austria':'EUR','ireland':'EUR','portugal':'EUR','finland':'EUR','greece':'EUR',
+ 'united kingdom':'GBP','uk':'GBP','great britain':'GBP',
+ 'japan':'JPY','switzerland':'CHF','canada':'CAD','australia':'AUD','new zealand':'NZD',
+ 'china':'CNY','sweden':'SEK','norway':'NOK','us':'USD','eu':'EUR','gb':'GBP','jp':'JPY','ch':'CHF','ca':'CAD','au':'AUD','nz':'NZD','de':'EUR','fr':'EUR','it':'EUR','es':'EUR'
+ };
+ if(map[x])return map[x];
+ let upper=raw.toUpperCase();
+ if(['USD','EUR','GBP','JPY','CHF','CAD','AUD','NZD','CNY','SEK','NOK'].includes(upper))return upper;
+ return ''
+}
+function eventCurrency(e){
+ let direct=String(e.currency||e.ccy||e.currencyCode||e.currency_code||'').trim().toUpperCase();
+ if(direct)return direct;
+ let byCountry=currencyFromCountry(e.country||e.countryName||e.country_code||'');
+ if(byCountry)return byCountry;
+ let t=String(e.event||e.name||e.title||'').toLowerCase();
+ if(/ecb|euro area|eurozone|germany|german|france|french|italy|italian|spain|spanish/.test(t))return'EUR';
+ if(/federal reserve|\bfed\b|united states|u\.s\.|nonfarm|nfp|michigan/.test(t))return'USD';
+ if(/bank of england|\bboe\b|united kingdom|british/.test(t))return'GBP';
+ if(/bank of japan|\bboj\b|japan/.test(t))return'JPY';
+ if(/snb|switzerland|swiss/.test(t))return'CHF';
+ if(/bank of canada|canada/.test(t))return'CAD';
+ if(/rba|australia/.test(t))return'AUD';
+ if(/rbnz|new zealand/.test(t))return'NZD';
+ return''
+}
+
+
+function ukEventExplanation(title){
+ const t=String(title||'').toLowerCase();
+ const rules=[
+  [/durable goods orders/,'Замовлення на товари тривалого користування. Показують зміну нових замовлень на товари з довгим строком використання. Сильніше значення від прогнозу часто підтримує валюту.'],
+  [/non.?farm|nfp/,'NFP — зміна зайнятості у США поза сільським господарством. Один із ключових релізів для USD та очікувань щодо політики ФРС.'],
+  [/unemployment rate|рівень безробіття/,'Частка робочої сили без роботи, яка активно її шукає. Важливий індикатор стану ринку праці.'],
+  [/employment change|labour force|зміна зайнятості/,'Показує зміну кількості зайнятих. Сильний ринок праці може впливати на очікування щодо процентних ставок.'],
+  [/consumer price|cpi/,'CPI — ключовий показник споживчої інфляції. Відхилення від прогнозу може суттєво рухати валюту.'],
+  [/pce/,'PCE — показник інфляції, за яким особливо уважно стежить ФРС США.'],
+  [/interest rate decision|policy rate|rate decision|loan prime rate/,'Рішення центрального банку щодо процентної ставки. Зміна ставки або риторики може викликати сильний рух валюти.'],
+  [/monetary policy assessment/,'Оцінка центральним банком інфляції, економіки та майбутньої монетарної політики. Важливі сигнали щодо наступних рішень по ставці.'],
+  [/press conference/,'Пресконференція центрального банку. Коментарі щодо ставок, інфляції та економіки можуть спричинити підвищену волатильність.'],
+  [/ifo business climate/,'Ifo Business Climate — індикатор настроїв німецьких компаній. Важливий випереджальний показник для економіки Німеччини та EUR.'],
+  [/michigan.*sentiment|consumer sentiment/,'Індекс споживчих настроїв показує впевненість домогосподарств у стані економіки та перспективах споживання.'],
+  [/jobless claims|unemployment claims/,'Нові заявки на допомогу з безробіття. Оперативний індикатор стану ринку праці США.'],
+  [/new home sales/,'Продажі нових будинків — показник активності ринку житла та внутрішнього попиту.'],
+  [/pmi/,'PMI — індекс ділової активності. Вище 50 зазвичай означає розширення сектору, нижче 50 — скорочення.'],
+  [/bank holiday|holiday|tse\/jpx hours/,'Неробочий або скорочений торговий день. Ліквідність може бути нижчою, а торгові години — зміненими.'],
+  [/snb/,'Подія Швейцарського національного банку. Рішення та сигнали щодо ставок і валютної політики можуть суттєво впливати на CHF.'],
+  [/riksbank/,'Подія центрального банку Швеції. Найбільше впливає на SEK та очікування щодо шведських ставок.'],
+  [/norges bank/,'Подія центрального банку Норвегії. Рішення та прогнози щодо ставки найбільше впливають на NOK.']
+ ];
+ for(const [re,txt] of rules)if(re.test(t))return txt;
+ return 'Економічна подія, яка може впливати на відповідну валюту. Порівнюй фактичне значення з прогнозом і стеж за реакцією ціни після публікації.';
+}
+
+function ukEventTitle(title){
+ let s=String(title||'—');
+ const exact={
+  'Durable Goods Orders m/m':'Замовлення на товари тривалого користування м/м',
+  'Core Durable Goods Orders m/m':'Базові замовлення на товари тривалого користування м/м',
+
+  'Bank Holiday':'Банківський вихідний',
+  'Federal Reserve Interest Rate Decision':'Рішення ФРС щодо процентної ставки',
+  'ECB Interest Rate Decision':'Рішення ЄЦБ щодо процентної ставки',
+  'BoE Interest Rate Decision':'Рішення Банку Англії щодо процентної ставки',
+  'BoJ Interest Rate Decision':'Рішення Банку Японії щодо процентної ставки',
+  'SNB Interest Rate Decision':'Рішення НБ Швейцарії щодо процентної ставки',
+  'RBA Interest Rate Decision':'Рішення РБ Австралії щодо процентної ставки',
+  'BoC Interest Rate Decision':'Рішення Банку Канади щодо процентної ставки',
+  'Non Farm Payrolls':'Зайнятість поза с/г сектором США (NFP)',
+  'Nonfarm Payrolls':'Зайнятість поза с/г сектором США (NFP)',
+  'Unemployment Rate':'Рівень безробіття',
+  'Consumer Price Index (CPI)':'Індекс споживчих цін (CPI)',
+  'Core Consumer Price Index (CPI)':'Базовий CPI',
+  'Gross Domestic Product (GDP)':'Валовий внутрішній продукт (ВВП)',
+  'Retail Sales':'Роздрібні продажі',
+  'Initial Jobless Claims':'Первинні заявки на допомогу з безробіття',
+  'Consumer Confidence':'Споживча довіра',
+
+  'PBoC Loan Prime Rate':'Ключова кредитна ставка НБ Китаю (LPR)',
+  'PBoC Interest Rate Decision':'Рішення НБ Китаю щодо процентної ставки',
+  'Federal Reserve Interest Rate Decision':'Рішення ФРС щодо процентної ставки',
+  'ECB Interest Rate Decision':'Рішення ЄЦБ щодо процентної ставки',
+  'BoE Interest Rate Decision':'Рішення Банку Англії щодо процентної ставки',
+  'BoJ Interest Rate Decision':'Рішення Банку Японії щодо процентної ставки',
+  'Non Farm Payrolls':'Зміна зайнятості поза с/г сектором США (NFP)',
+  'Nonfarm Payrolls':'Зміна зайнятості поза с/г сектором США (NFP)',
+  'Unemployment Rate':'Рівень безробіття',
+  'Consumer Price Index (CPI)':'Індекс споживчих цін (CPI)',
+  'Core Consumer Price Index (CPI)':'Базовий індекс споживчих цін (Core CPI)',
+  'Gross Domestic Product (GDP)':'Валовий внутрішній продукт (ВВП)',
+  'Retail Sales':'Роздрібні продажі',
+  'Initial Jobless Claims':'Первинні заявки на допомогу з безробіття',
+  'Existing Home Sales':'Продажі житла на вторинному ринку',
+  'New Home Sales':'Продажі нових будинків',
+  'Consumer Confidence':'Індекс споживчої довіри',
+  'Manufacturing PMI':'PMI у виробничому секторі',
+  'Services PMI':'PMI у секторі послуг'
+ };
+ if(exact[s])return exact[s];
+ let rules=[
+  [/FOMC Member (.+) Speaks/i,'Виступ члена FOMC $1'],
+  [/ECB President (.+) Speaks/i,'Виступ президента ЄЦБ $1'],
+  [/ECB Member (.+) Speaks/i,'Виступ представника ЄЦБ $1'],
+  [/Fed Chair (.+) Speaks/i,'Виступ голови ФРС $1'],
+  [/Fed (.+) Speaks/i,'Виступ представника ФРС $1'],
+  [/BOE Gov (.+) Speaks/i,'Виступ голови Банку Англії $1'],
+  [/BOC Gov (.+) Speaks/i,'Виступ голови Банку Канади $1'],
+  [/RBA Gov (.+) Speaks/i,'Виступ голови РБ Австралії $1'],
+  [/Interest Rate Decision/i,'Рішення щодо процентної ставки'],
+  [/Interest Rate/i,'Процентна ставка'],
+  [/Inflation Rate/i,'Рівень інфляції'],
+  [/Core Inflation/i,'Базова інфляція'],
+  [/Consumer Price Index|CPI/i,'Індекс споживчих цін (CPI)'],
+  [/Producer Price Index|PPI/i,'Індекс цін виробників (PPI)'],
+  [/Nonfarm Payrolls|Non Farm Payrolls/i,'Зайнятість поза с/г сектором США (NFP)'],
+  [/Unemployment Rate/i,'Рівень безробіття'],
+  [/Employment Change/i,'Зміна зайнятості'],
+  [/Jobless Claims/i,'Заявки на допомогу з безробіття'],
+  [/Retail Sales/i,'Роздрібні продажі'],
+  [/GDP/i,'ВВП'],
+  [/Trade Balance/i,'Торговельний баланс'],
+  [/Consumer Confidence/i,'Споживча довіра'],
+  [/Manufacturing PMI/i,'Виробничий PMI'],
+  [/Services PMI/i,'PMI сфери послуг'],
+  [/Composite PMI/i,'Композитний PMI'],
+  [/New Home Sales/i,'Продажі нових будинків'],
+  [/Existing Home Sales/i,'Продажі житла на вторинному ринку'],
+  [/Building Permits/i,'Дозволи на будівництво'],
+  [/Durable Goods Orders/i,'Замовлення на товари тривалого користування'],
+
+  [/Is the Stock Market Open on (.+)\?/i,'Чи працює фондовий ринок у $1?'],
+  [/Stock Market Holiday/i,'Вихідний на фондовому ринку'],
+  [/Interest Rate Decision/i,'Рішення щодо процентної ставки'],
+  [/Interest Rate/i,'Процентна ставка'],
+  [/Inflation Rate/i,'Рівень інфляції'],
+  [/Core Inflation/i,'Базова інфляція'],
+  [/Consumer Price Index/i,'Індекс споживчих цін'],
+  [/Producer Price Index/i,'Індекс цін виробників'],
+  [/Unemployment Rate/i,'Рівень безробіття'],
+  [/Employment Change/i,'Зміна зайнятості'],
+  [/Jobless Claims/i,'Заявки на допомогу з безробіття'],
+  [/Retail Sales/i,'Роздрібні продажі'],
+  [/Industrial Production/i,'Промислове виробництво'],
+  [/GDP/i,'ВВП'],
+  [/Trade Balance/i,'Торговельний баланс'],
+  [/Consumer Confidence/i,'Споживча довіра'],
+  [/Manufacturing PMI/i,'Виробничий PMI'],
+  [/Services PMI/i,'PMI сектору послуг'],
+  [/Composite PMI/i,'Композитний PMI'],
+  [/Building Permits/i,'Дозволи на будівництво'],
+  [/Housing Starts/i,'Початок будівництва житла'],
+  [/Existing Home Sales/i,'Продажі житла на вторинному ринку'],
+  [/New Home Sales/i,'Продажі нових будинків'],
+  [/Durable Goods Orders/i,'Замовлення на товари тривалого користування']
+ ];
+ for(let [re,to] of rules)if(re.test(s))return s.replace(re,to);
+ return s;
+}
+
+
+function calendarEventDate(e){
+ let epoch=e.rawTimestamp||'';
+ if(epoch!=='' && /^\d{10,13}$/.test(String(epoch))){
+   let n=Number(epoch); if(String(epoch).length===10)n*=1000;
+   return new Date(n).toISOString();
+ }
+ let dt=e.sourceDateTime||e.datetime||e.timestamp||e.start||'';
+ if(dt && (/T\d{1,2}:\d{2}/.test(String(dt))||/\s\d{1,2}:\d{2}/.test(String(dt)))) return dt;
+ let day=e.eventDate||e.date||'';
+ let tm=e.eventTime||e.time||'';
+ if(day&&tm){
+   let t=String(tm).trim();
+   if(/^\d{1,2}:\d{2}/.test(t)) return String(day).slice(0,10)+'T'+t;
+   if(/^\d{1,2}:\d{2}\s*(AM|PM)$/i.test(t)){
+     let m=t.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i),h=+m[1],mi=m[2],ap=m[3].toUpperCase();
+     if(ap==='PM'&&h<12)h+=12;if(ap==='AM'&&h===12)h=0;
+     return String(day).slice(0,10)+'T'+String(h).padStart(2,'0')+':'+mi;
+   }
+ }
+ return dt||day||'';
+}
+function calendarHasRealTime(v){
+ const s=String(v||'').trim();
+ return /T\d{1,2}:\d{2}/.test(s)||/\s\d{1,2}:\d{2}/.test(s);
+}
+function calendarDateObj(v){
+ if(v instanceof Date)return v;
+ let s=String(v||'').trim();
+ if(!s)return null;
+ // TradingView sometimes formats UTC as "YYYY-MM-DD THH:mm:ss.sss Z".
+ s=s.replace(/\sT/,'T').replace(/\sZ$/,'Z');
+ // Explicit offsets/Z are respected. A feed timestamp without an offset is
+ // normalized as UTC before conversion to Europe/Kyiv.
+ if (/^\d{4}-\d{2}-\d{2}T\d{1,2}:\d{2}/.test(s) && !/(Z|[+-]\d{2}:?\d{2})$/i.test(s)) s+='Z';
+ let d=new Date(s);
+ return isNaN(d)?null:d;
+}
+
+function kyivEventTime(value){
+ const d=calendarDateObj(value);
+ if(!d||!calendarHasRealTime(value))return '—';
+ return d.toLocaleTimeString('uk-UA',{timeZone:'Europe/Kyiv',hour:'2-digit',minute:'2-digit',hour12:false});
+}
+function kyivEventDate(value){
+ const d=calendarDateObj(value);
+ if(!d)return '';
+ return d.toLocaleDateString('uk-UA',{timeZone:'Europe/Kyiv',day:'2-digit',month:'2-digit'});
+}
+
+function renderCalendar(){
+ let cur=$('#calCurrency')?.value||'EUR,USD',imp=$('#calImpact')?.value||'ALL',allowed=cur==='ALL'?null:cur.split(',');
+ let rows=calRaw.filter(e=>{let cc=eventCurrency(e);let ic=impactClass(e.impact||e.importance);return(!allowed||allowed.includes(cc))&&(imp==='ALL'||ic==='high'||(imp==='medium'&&ic==='medium'))}).sort((a,b)=>(calendarDateObj(calendarEventDate(a))||0)-(calendarDateObj(calendarEventDate(b))||0));
+ let box=$('#economicCalendar');if(!box)return;
+ if(!rows.length){box.className='news-empty';box.innerHTML='<b>Подій за цими фільтрами немає</b>Спробуй іншу валюту, важливість або період.';return}
+ box.className='';box.innerHTML=`<table class='news-table'><thead><tr><th>Час</th><th>Валюта</th><th>Вплив</th><th>Подія</th><th>Факт</th><th>Прогноз</th><th>Попереднє</th></tr></thead><tbody>${rows.map(e=>{let raw=calendarEventDate(e),d=calendarDateObj(raw),time=e.allDay?'Весь день':kyivEventTime(raw),day=kyivEventDate(raw),cc=eventCurrency(e),ic=impactClass(e.impact||e.importance);return `<tr><td>${(calRange===7||calRange===30)?`<span style="display:block;color:#73879b;font-size:7px">${day}</span>`:''}${time}</td><td><span class='currency-pill'>${cc||'—'}</span></td><td><span class='impact ${ic}'>${ic==='high'?'Висока':ic==='medium'?'Середня':'Низька'}</span></td><td class='news-event news-event-help' title="${esc(ukEventExplanation(e.event||e.name||'—'))}">${esc(e.event||e.name||'—')}</td><td class='news-val'>${e.actual??'—'}</td><td class='news-val'>${e.estimate??e.consensus??e.forecast??'—'}</td><td class='news-val'>${e.previous??'—'}</td></tr>`}).join('')}</tbody></table>`}
+
+const EMBEDDED_MAJOR_CALENDAR=[{"title": "Core Durable Goods Orders m/m", "country": "USD", "date": "2026-09-25T08:30:00-04:00", "impact": "High", "forecast": "0.5%", "previous": "0.4%"}, {"title": "Durable Goods Orders m/m", "country": "USD", "date": "2026-09-25T08:30:00-04:00", "impact": "High", "forecast": "-0.3%", "previous": "1.1%"}, {"title": "Revised UoM Consumer Sentiment", "country": "USD", "date": "2026-09-25T10:00:00-04:00", "impact": "Medium", "forecast": "47.5", "previous": "47.8"}, {"title": "Revised UoM Inflation Expectations", "country": "USD", "date": "2026-09-25T10:00:00-04:00", "impact": "Medium", "forecast": "", "previous": "4.6%"}, {"title": "SNB Monetary Policy Assessment", "country": "CHF", "date": "2026-09-24T03:30:00-04:00", "impact": "High", "forecast": "", "previous": ""}, {"title": "SNB Policy Rate", "country": "CHF", "date": "2026-09-24T03:30:00-04:00", "impact": "High", "forecast": "0.00%", "previous": "0.00%"}, {"title": "SNB Press Conference", "country": "CHF", "date": "2026-09-24T04:00:00-04:00", "impact": "High", "forecast": "", "previous": ""}, {"title": "Employment Change", "country": "AUD", "date": "2026-09-23T21:30:00-04:00", "impact": "High", "forecast": "20.9K", "previous": "-15.8K"}, {"title": "Unemployment Rate", "country": "AUD", "date": "2026-09-23T21:30:00-04:00", "impact": "High", "forecast": "4.5%", "previous": "4.5%"}, {"title": "BOE Gov Bailey Speaks", "country": "GBP", "date": "2026-09-25T05:15:00-04:00", "impact": "High", "forecast": "", "previous": ""}];
+function embeddedMajorEvents(){
+ return EMBEDDED_MAJOR_CALENDAR.map(e=>({
+   date:e.date,datetime:e.date,currency:e.country,country:e.country,
+   impact:e.impact,importance:e.impact,event:e.title,name:e.title,
+   actual:e.actual??'—',forecast:e.forecast??'—',estimate:e.forecast??'—',
+   previous:e.previous??'—',allDay:false,source:'Вбудований macro-feed'
+ }));
+}
+
+function majorMacroImpact(title, impact){
+ let t=String(title||'').toLowerCase();
+ //  safety override for the macro releases that traders
+ // normally treat as major market-moving events.
+ if(/durable goods orders m\/m|core durable goods orders m\/m|non.?farm|nfp|cpi|core cpi|pce price|core pce|fomc.*rate|federal funds rate|interest rate decision|gdp q\/q|unemployment rate/.test(t)) return 'High';
+ return impact||'Low';
+}
+function mergeCalendarEvents(primary, extra){
+ let out=[...primary];
+ for(const e of extra){
+   let td=calendarDateObj(calendarEventDate(e));
+   let keyTitle=String(e.event||e.name||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
+   let dup=out.some(x=>{
+     let xd=calendarDateObj(calendarEventDate(x));
+     let xt=String(x.event||x.name||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
+     return eventCurrency(x)===eventCurrency(e) && xt===keyTitle && xd && td && Math.abs(xd-td)<10*60*1000;
+   });
+   if(!dup)out.push(e);
+ }
+ return out;
+}
+async function loadCalendar(){
+ let status=$('#calendarStatus');
+ let start=new Date(),end=new Date();
+ if(calRange===1){start.setDate(start.getDate()+1);end=new Date(start)}
+ else if(calRange===7)end.setDate(end.getDate()+7);
+ else if(calRange===30)end.setDate(end.getDate()+30);
+
+ if(status)status.textContent='Оновлюю економічний календар…';
+ try{
+   // Base feed gives the longer 30-day horizon.
+   const url=`https://www.financecalendar.com/wp-json/fc/v1/calendar?from=${localISO(start)}&to=${localISO(end)}&limit=500`;
+   const baseReq=fetch(url,{cache:'no-store',headers:{'Accept':'application/json'}}).then(async r=>{
+     if(!r.ok)throw new Error('Finance HTTP '+r.status);
+     const x=await r.json();
+     const arr=Array.isArray(x)?x:(Array.isArray(x.events)?x.events:(Array.isArray(x.data)?x.data:[]));
+     return arr.map(e=>({
+       date:e.time_utc||e.datetime||e.start||e.date||'',
+       datetime:e.time_utc||e.datetime||e.start||e.date||'',
+       eventDate:e.date||'', eventTime:e.time_utc||e.time_et||'',
+       currency:e.currency||e.ccy||'', country:e.country||e.countryName||e.country_code||'',
+       impact:majorMacroImpact(e.name||e.title||e.event||e.release,e.impact||e.importance||e.severity||'low'),
+       importance:majorMacroImpact(e.name||e.title||e.event||e.release,e.impact||e.importance||e.severity||'low'),
+       event:e.name||e.title||e.event||e.release||'—', name:e.name||e.title||e.event||e.release||'—',
+       actual:e.actual??'—', forecast:e.consensus??e.forecast??'—',
+       estimate:e.consensus??e.forecast??'—', previous:e.prior??e.previous??'—',
+       allDay:!!e.all_day, source:'Finance Calendar'
+     }));
+   }).catch(()=>[]);
+
+   // Forex Factory weekly export fills the gaps in the current trading week:
+   // Durable Goods, Core Durable Goods, speeches, PMI, etc.
+   const ffReq=fetch('https://nfs.faireconomy.media/ff_calendar_thisweek.json',{cache:'no-store'})
+     .then(async r=>{
+       if(!r.ok)throw new Error('FF HTTP '+r.status);
+       const arr=await r.json();
+       return (Array.isArray(arr)?arr:[]).map(e=>({
+         date:e.date||'', datetime:e.date||'',
+         currency:e.country||'', country:e.country||'',
+         impact:majorMacroImpact(e.title,e.impact),
+         importance:majorMacroImpact(e.title,e.impact),
+         event:e.title||'—', name:e.title||'—',
+         actual:e.actual??'—', forecast:e.forecast??'—', estimate:e.forecast??'—',
+         previous:e.previous??'—', allDay:String(e.impact||'').toLowerCase()==='holiday',
+         source:'Forex Factory'
+       }));
+     }).catch(()=>[]);
+
+   let [base,ff]=await Promise.all([baseReq,ffReq]);
+   calRaw=mergeCalendarEvents(mergeCalendarEvents(base,ff),embeddedMajorEvents());
+
+   // Respect selected period even though FF returns the full current week.
+   let from=start.getTime(), to=new Date(end.getFullYear(),end.getMonth(),end.getDate(),23,59,59,999).getTime();
+   calRaw=calRaw.filter(e=>{let d=calendarDateObj(calendarEventDate(e));return d && d.getTime()>=from && d.getTime()<=to});
+
+   if(!calRaw.length)throw new Error('empty');
+   renderCalendar();
+   let hasFF=calRaw.some(e=>e.source==='Forex Factory'); let hasEmbedded=calRaw.some(e=>e.source==='Вбудований macro-feed');
+   if(status)status.textContent=`${hasFF?'Finance Calendar + Forex Factory':(hasEmbedded?'Finance Calendar + Macro':'Finance Calendar')} · ${new Date().toLocaleTimeString('uk-UA',{timeZone:'Europe/Kyiv',hour:'2-digit',minute:'2-digit',hour12:false})} · час виходу за Києвом`;
+ }catch(e){
+   if(status)status.textContent='Не вдалося завантажити календар.';
+   let box=$('#economicCalendar');
+   if(box){box.className='news-empty';box.innerHTML='<b>Календар тимчасово недоступний</b>Натисни «Оновити» трохи пізніше.'}
+ }
+}
+function initCalendarUI(){
+ let rangeSel=$('#calendarRange');
+ if(rangeSel){
+   rangeSel.value=String(calRange);
+   rangeSel.onchange=()=>{calRange=Number(rangeSel.value);loadCalendar()};
+ }
+ if($('#calCurrency'))$('#calCurrency').onchange=renderCalendar;
+ if($('#calImpact'))$('#calImpact').onchange=renderCalendar;
+ if($('#refreshCalendar'))$('#refreshCalendar').onclick=loadCalendar;
+ loadCalendar()
+}
+document.addEventListener('click',e=>{if(!e.target.closest('.metric'))$$('.metric-popover').forEach(x=>x.classList.remove('open'))});
+function renderAdvice(){let ideas=[];function gs(key){return Object.entries(group(key)).map(([name,a])=>({name,...stats(a)})).filter(x=>x.n>=3)}let sessions=gs('session'),sides=gs('side'),models=gs('model');let bestSession=[...sessions].sort((a,b)=>b.exp-a.exp)[0],worstSession=[...sessions].sort((a,b)=>a.exp-b.exp)[0],bestSide=[...sides].sort((a,b)=>b.exp-a.exp)[0],worstSide=[...sides].sort((a,b)=>a.exp-b.exp)[0],bestModel=[...models].sort((a,b)=>b.exp-a.exp)[0];if(bestSession&&bestSession.exp>0)ideas.push({type:'good',title:`Сильна сесія: ${bestSession.name}`,text:`${bestSession.n} угод · ${bestSession.wr.toFixed(1)}% WR · ${bestSession.sum>=0?'+':''}${bestSession.sum.toFixed(1)}R. Тут зараз найвище середнє: ${bestSession.exp.toFixed(2)}R на угоду.`});if(worstSide&&worstSide.exp<=0)ideas.push({type:'bad',title:`Переглянь угоди ${worstSide.name}`,text:`${worstSide.n} угод · ${worstSide.sum.toFixed(1)}R · ${worstSide.exp.toFixed(2)}R у середньому. Порівняй контекст цих входів із прибутковими.`});else if(bestSide)ideas.push({type:'good',title:`Сильніший напрямок: ${bestSide.name}`,text:`${bestSide.n} угод · ${bestSide.wr.toFixed(1)}% WR · ${bestSide.sum>=0?'+':''}${bestSide.sum.toFixed(1)}R. Відстежуй, чи перевага зберігається на більшій вибірці.`});if(bestModel&&bestModel.exp>0)ideas.push({type:'warn',title:`Придивись до моделі ${bestModel.name}`,text:`${bestModel.n} угод · ${bestModel.sum>=0?'+':''}${bestModel.sum.toFixed(1)}R · ${bestModel.exp.toFixed(2)}R у середньому. Перевір, у якому контексті вона працює найкраще.`});if(ideas.length<3&&worstSession)ideas.push({type:'warn',title:`Окремо розбери ${worstSession.name}`,text:`${worstSession.n} угод · ${worstSession.wr.toFixed(1)}% WR · ${worstSession.sum>=0?'+':''}${worstSession.sum.toFixed(1)}R. Шукай повторювані причини результату.`});if(ideas.length<3){let s=stats();ideas.push({type:'warn',title:'Продовжуй збирати вибірку',text:`У журналі ${s.n} завершених угод. Не змінюй правила через кілька останніх результатів — дивись на повторювані патерни.`})}let el=$('#traderAdvice');if(el)el.innerHTML=ideas.slice(0,3).map((x,i)=>`<div class='advice-item ${x.type}'><div class='advice-num'>${i+1}</div><div><div class='advice-title'>${x.title}</div><div class='advice-text'>${x.text}</div></div></div>`).join('')}
+function analyticCard(title,key,wide=false){let g=group(key),entries=Object.entries(g).sort((a,b)=>stats(b[1]).n-stats(a[1]).n);return `<div class='card analytics-card${wide?' analytics-wide':''}'><div class='analytics-title'><b>${title}</b><span class='analytics-count'>${entries.length} груп</span></div><table class='analytics-table'><thead><tr><th>Група</th><th>Угоди</th><th>WR</th><th>R</th><th>Сер. R</th></tr></thead><tbody>${entries.map(([k,a])=>{let s=stats(a),rc=s.sum>0?'pos':s.sum<0?'neg':'zero',ec=s.exp>0?'pos':s.exp<0?'neg':'zero',name=key==='grade'?(k==='A'?'<span class="grade-stars">★★★</span>':k==='B'?'<span class="grade-stars">★★</span>':k==='C'?'<span class="grade-stars">★</span>':k):k;return `<tr><td class='analytics-group'>${name}</td><td class='metric-n'>${s.n}</td><td><span class='metric-wr'>${s.wr.toFixed(1)}%</span></td><td class='metric-r ${rc}'>${s.sum>0?'+':''}${s.sum.toFixed(1)}R</td><td class='metric-exp ${ec}'>${s.exp>0?'+':''}${s.exp.toFixed(2)}R</td></tr>`}).join('')}</tbody></table></div>`}
+function renderАналітика(){$('#analyticsTables').innerHTML=`<div class="analytics-left-col">${analyticCard('За моделлю входу','model')}</div><div class="analytics-right-col">${analyticCard('За сесією','session')}${analyticCard('За напрямком','side')}${analyticCard('За класом сетапу','grade')}${analyticCard('За зняттям ліквідності','sweep')}${analyticCard('За HTF трендом','trend')}</div>`}
+function fillSessions(){let cur=$('#fSession').value,ks=Object.keys(group('session'));$('#fSession').innerHTML='<option value="">Усі сесії</option>'+ks.map(k=>`<option ${k==cur?'selected':''}>${k}</option>`).join('')}
+$$('.tabs button').forEach(b=>b.onclick=()=>{$$('.tabs button').forEach(x=>x.classList.remove('active'));b.classList.add('active');$$('section').forEach(x=>x.classList.remove('active'));$('#'+b.dataset.tab).classList.add('active')});['fSession','fSide','fResult'].forEach(id=>$('#'+id).onchange=renderRows);
+const INST_KEY='tj_instruments_v31';
+let instruments=[];
+function loadInstruments(){try{instruments=JSON.parse(localStorage.getItem(INST_KEY)||'[]')}catch(e){instruments=[]}let fromTrades=trades.map(t=>String(t.pair||'').trim().toUpperCase()).filter(Boolean);instruments=[...new Set(['EURUSD',...instruments,...fromTrades])];saveInstruments();renderInstrumentSelect()}
+function saveInstruments(){localStorage.setItem(INST_KEY,JSON.stringify(instruments))}
+function renderInstrumentSelect(selected){let s=$('#pairSelect');if(!s)return;let cur=selected||s.value||'EURUSD';s.innerHTML=instruments.map(x=>`<option value='${esc(x)}'>${esc(x)}</option>`).join('');if(instruments.includes(cur))s.value=cur}
+function renderInstrumentManager(){let box=$('#instrumentList');box.innerHTML=instruments.map((x,i)=>`<div class='instrument-row'><input value='${esc(x)}' data-inst-index='${i}'><button type='button' class='save-inst' data-inst-index='${i}'>Зберегти</button><button type='button' class='delete-inst' data-inst-index='${i}'>Видалити</button></div>`).join('');$$('.save-inst').forEach(b=>b.onclick=()=>{let i=+b.dataset.instIndex,v=box.querySelector(`input[data-inst-index="${i}"]`).value.trim().toUpperCase();if(!v)return;if(instruments.some((x,j)=>x===v&&j!==i)){alert('Такий інструмент вже є.');return}instruments[i]=v;saveInstruments();renderInstrumentSelect(v);renderInstrumentManager()});$$('.delete-inst').forEach(b=>b.onclick=()=>{let i=+b.dataset.instIndex;if(instruments.length===1)return;instruments.splice(i,1);saveInstruments();renderInstrumentSelect();renderInstrumentManager()})}
+function openInstrumentManager(){renderInstrumentManager();$('#instrumentModal').classList.add('open');setTimeout(()=>$('#newInstrument').focus(),0)}
+function closeInstrumentManager(){$('#instrumentModal').classList.remove('open')}
+$('#manageInstruments').onclick=openInstrumentManager;$('#closeInstrumentModal').onclick=closeInstrumentManager;$('#instrumentModal').onclick=e=>{if(e.target.id==='instrumentModal')closeInstrumentManager()};
+$('#addInstrument').onclick=()=>{let v=$('#newInstrument').value.trim().toUpperCase();if(!v)return;if(!instruments.includes(v)){instruments.push(v);saveInstruments()}renderInstrumentSelect(v);renderInstrumentManager();$('#newInstrument').value='';$('#newInstrument').focus()};
+$('#newInstrument').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();$('#addInstrument').click()}};
+
+const MODEL_KEY='tj_entry_models_v2';
+let entryModels=[];
+function loadEntryModels(){
+  try{entryModels=JSON.parse(localStorage.getItem(MODEL_KEY)||'[]')}catch(e){entryModels=[]}
+  if(!Array.isArray(entryModels)||!entryModels.length) entryModels=['FVG','OB','BPR','Gap'];
+  entryModels=[...new Set(entryModels.map(x=>String(x||'').trim()).filter(Boolean))];
+  saveEntryModels();renderModelSelect();
+}
+function saveEntryModels(){localStorage.setItem(MODEL_KEY,JSON.stringify(entryModels))}
+function renderModelSelect(selected){
+  const s=$('#modelSelect');if(!s)return;
+  const cur=selected||s.value||entryModels[0]||'OB';
+  s.innerHTML=entryModels.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('');
+  if(entryModels.includes(cur))s.value=cur;
+}
+function renderModelManager(){
+  const box=$('#modelList');
+  box.innerHTML=entryModels.map((x,i)=>`<div class="instrument-row"><input value="${esc(x)}" data-model-index="${i}"><button type="button" class="save-model" data-model-index="${i}">Зберегти</button><button type="button" class="delete-model" data-model-index="${i}">Видалити</button></div>`).join('');
+  $$('.save-model').forEach(b=>b.onclick=()=>{
+    const i=+b.dataset.modelIndex;
+    const v=box.querySelector(`input[data-model-index="${i}"]`).value.trim();
+    if(!v)return;
+    if(entryModels.some((x,j)=>x.toLowerCase()===v.toLowerCase()&&j!==i)){alert('Така модель вже є.');return}
+    entryModels[i]=v;saveEntryModels();renderModelSelect(v);renderModelManager();
+  });
+  $$('.delete-model').forEach(b=>b.onclick=()=>{
+    const i=+b.dataset.modelIndex;
+    if(entryModels.length===1)return;
+    entryModels.splice(i,1);saveEntryModels();renderModelSelect();renderModelManager();
+  });
+}
+function openModelManager(){renderModelManager();$('#modelModal').classList.add('open');setTimeout(()=>$('#newModel').focus(),0)}
+function closeModelManager(){$('#modelModal').classList.remove('open')}
+const manageModelsBtn=$('#manageModels');if(manageModelsBtn){manageModelsBtn.onclick=e=>{e.preventDefault();e.stopPropagation();openModelManager()}};
+$('#closeModelModal').onclick=closeModelManager;
+$('#modelModal').onclick=e=>{if(e.target.id==='modelModal')closeModelManager()};
+$('#addModel').onclick=()=>{
+  const v=$('#newModel').value.trim();if(!v)return;
+  if(!entryModels.some(x=>x.toLowerCase()===v.toLowerCase())){entryModels.push(v);saveEntryModels()}
+  renderModelSelect(v);renderModelManager();$('#newModel').value='';$('#newModel').focus();
+};
+$('#newModel').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();$('#addModel').click()}};
+
+let pendingShotGroups={before:[],after:[]};
+let activeShotSlot=null;
+const SHOT_TFS=['M1','M5','M15','M30','H1','H4','D1'];
+function emptyShot(tf){return {tf,data:'',url:''}}
+function newShotSlot(group,tf='M15'){pendingShotGroups[group].push(emptyShot(tf));renderShotGroup(group)}
+function shotGroupEl(group){return document.getElementById(group==='before'?'shotsBefore':'shotsAfter')}
+function validTradingViewUrl(v){try{let u=new URL(String(v).trim());let h=u.hostname.toLowerCase();return (h==='tradingview.com'||h.endsWith('.tradingview.com'))&&/^\/x\/[A-Za-z0-9]+\/?$/i.test(u.pathname)}catch(e){return false}}
+function tradingViewPreview(url){let m=String(url||'').match(/tradingview\.com\/x\/([A-Za-z0-9]+)/i);if(!m)return '';let id=m[1];return `https://s3.tradingview.com/snapshots/${id[0].toLowerCase()}/${id}.png`}
+function compressImage(file){
+  return new Promise((resolve,reject)=>{
+    if(!file||!file.type||!file.type.startsWith('image/')){reject(new Error('not image'));return}
+    const reader=new FileReader();
+    reader.onerror=()=>reject(reader.error||new Error('read error'));
+    reader.onload=()=>{
+      const original=reader.result;
+      const img=new Image();
+      img.onerror=()=>resolve(original); // safe fallback: keep original data URL
+      img.onload=()=>{
+        try{
+          const max=1600, scale=Math.min(1,max/Math.max(img.width,img.height));
+          const w=Math.max(1,Math.round(img.width*scale)),h=Math.max(1,Math.round(img.height*scale));
+          const c=document.createElement('canvas');c.width=w;c.height=h;
+          c.getContext('2d').drawImage(img,0,0,w,h);
+          resolve(c.toDataURL('image/jpeg',.82));
+        }catch(err){resolve(original)}
+      };
+      img.src=original;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+function setShotUrl(group,index,url){
+  url=String(url||'').trim();
+  if(!url){pendingShotGroups[group][index].url='';renderShotGroup(group);return}
+  if(!validTradingViewUrl(url)){alert('Встав посилання TradingView у форматі https://www.tradingview.com/x/XXXXXXXX/');return}
+  pendingShotGroups[group][index].url=url;pendingShotGroups[group][index].data='';renderShotGroup(group);
+}
+function renderShotGroup(group){
+  const root=shotGroupEl(group); if(!root)return;
+  root.innerHTML=pendingShotGroups[group].map((s,i)=>{let preview=s.data||tradingViewPreview(s.url)||'';return `
+    <div class="shot-slot-card">
+      <div class="shot-slot" tabindex="0" data-group="${group}" data-index="${i}">
+        <select class="shot-tf" aria-label="Таймфрейм">${SHOT_TFS.map(tf=>`<option ${tf===s.tf?'selected':''}>${tf}</option>`).join('')}</select>
+        <button type="button" class="shot-slot-remove" title="Видалити">×</button>
+        ${preview?`<img class="shot-preview" src="${esc(preview)}" alt="${esc(s.tf)} screenshot" ${s.url&&!s.data?`data-tv-url="${esc(s.url)}"`:``}><span class="shot-slot-badge">${esc(s.tf)}</span>`:s.url?`<a class="shot-tv-card" href="${esc(s.url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()"><div class="tv-mark">TV</div><strong>TradingView snapshot</strong><span>Мініатюра не завантажується локально.<br>Натисни, щоб відкрити графік ↗</span></a><span class="shot-slot-badge">${esc(s.tf)}</span>`:`<div class="shot-slot-empty"><div><b>Встав скрін</b><div class="paste-methods">Клікни сюди → Ctrl+V / ⌘V<br>або встав TV-посилання ↓</div></div></div>`}
+        <button type="button" class="shot-file-btn">+ Файл</button>
+        <input class="shot-slot-file" type="file" accept="image/*">
+      </div>
+      <div class="shot-url-row"><input class="shot-url-input" type="url" value="${esc(s.url||'')}" placeholder="TradingView: tradingview.com/x/..."><a class="shot-url-open" href="${esc(s.url||'#')}" target="_blank" rel="noopener" title="Відкрити TradingView">↗</a></div>
+    </div>`}).join('');
+  root.querySelectorAll('.shot-slot').forEach(slot=>{
+    const i=+slot.dataset.index, file=slot.querySelector('.shot-slot-file'), sel=slot.querySelector('.shot-tf');
+    const previewImg=slot.querySelector('.shot-preview[data-tv-url]');
+    if(previewImg) previewImg.addEventListener('error',()=>{previewImg.remove();slot.classList.add('preview-error')},{once:true});
+    if(pendingShotGroups[group][i].data||pendingShotGroups[group][i].url)slot.classList.add('has-preview');
+    slot.addEventListener('mousedown',e=>{if(!e.target.closest('select,button,input,a'))activeShotSlot={group,index:i}});
+    slot.addEventListener('click',e=>{
+      if(e.target.closest('.shot-slot-remove')||e.target.closest('.shot-tf')||e.target.closest('.shot-file-btn'))return;
+      const img=e.target.closest('.shot-preview');
+      if(img){e.stopPropagation();openImageLightbox(img.src);return}
+      activeShotSlot={group,index:i};slot.focus();
+    });
+    slot.querySelector('.shot-file-btn').addEventListener('click',e=>{e.stopPropagation();activeShotSlot={group,index:i};file.value='';file.click()});
+    slot.addEventListener('focus',()=>{activeShotSlot={group,index:i};slot.classList.add('focus')});
+    slot.addEventListener('blur',()=>slot.classList.remove('focus'));
+    file.addEventListener('change',()=>{if(file.files&&file.files[0])setMultiShot(group,i,file.files[0])});
+    sel.addEventListener('change',e=>{e.stopPropagation();pendingShotGroups[group][i].tf=sel.value;renderShotGroup(group)});
+    slot.querySelector('.shot-slot-remove').addEventListener('click',e=>{e.stopPropagation();pendingShotGroups[group].splice(i,1);if(!pendingShotGroups[group].length)pendingShotGroups[group].push(emptyShot(group==='before'?'H1':'M5'));activeShotSlot=null;renderShotGroup(group)});
+  });
+  root.querySelectorAll('.shot-url-input').forEach((inp,i)=>{
+    inp.addEventListener('focus',()=>{activeShotSlot={group,index:i}});
+    inp.addEventListener('input',()=>{let v=inp.value.trim();if(validTradingViewUrl(v))setShotUrl(group,i,v)});
+    inp.addEventListener('change',()=>{let v=inp.value.trim();if(v)setShotUrl(group,i,v)});
+    inp.addEventListener('paste',e=>{let txt=e.clipboardData.getData('text').trim();if(validTradingViewUrl(txt)){e.preventDefault();setShotUrl(group,i,txt)}});
+  });
+}
+function setMultiShot(group,index,file){
+  if(!file||!file.type.startsWith('image/')){alert('Обери файл зображення.');return}
+  compressImage(file).then(data=>{pendingShotGroups[group][index].data=data;pendingShotGroups[group][index].url='';renderShotGroup(group)}).catch(()=>alert('Не вдалося прочитати зображення. Спробуй інший файл.'));
+}
+document.querySelectorAll('.shot-add').forEach(b=>b.addEventListener('click',()=>newShotSlot(b.dataset.group,b.dataset.group==='before'?'H1':'M5')));
+document.addEventListener('paste',e=>{
+  if(e.target?.classList?.contains('shot-url-input'))return;
+  const image=[...(e.clipboardData?.items||[])].find(x=>x.type&&x.type.startsWith('image/'))?.getAsFile();
+  if(image&&activeShotSlot){e.preventDefault();setMultiShot(activeShotSlot.group,activeShotSlot.index,image);return}
+  const txt=e.clipboardData?.getData('text')?.trim()||'';
+  if(txt&&activeShotSlot&&validTradingViewUrl(txt)){e.preventDefault();setShotUrl(activeShotSlot.group,activeShotSlot.index,txt)}
+});
+pendingShotGroups.before=[emptyShot('H1')];pendingShotGroups.after=[emptyShot('M5')];renderShotGroup('before');renderShotGroup('after');
+
+$('#tradeForm').onsubmit=e=>{e.preventDefault();let o=Object.fromEntries(new FormData(e.target));o.r=+o.r;o.risk=+o.risk;
+o.shotsBefore=pendingShotGroups.before.filter(x=>x.data||x.url).map(x=>({tf:x.tf,data:x.data||'',url:x.url||''}));
+o.shotsAfter=pendingShotGroups.after.filter(x=>x.data||x.url).map(x=>({tf:x.tf,data:x.data||'',url:x.url||''}));
+o.before=o.shotsBefore[0]?.data||o.shotsBefore[0]?.url||'';o.after=o.shotsAfter[0]?.data||o.shotsAfter[0]?.url||'';
+o.id='Trade #'+(trades.length+1);o.model=String(o.model||'').trim();if(o.model&&!entryModels.includes(o.model)){entryModels.push(o.model);saveEntryModels()}o.pair=String(o.pair||'').trim().toUpperCase();if(o.pair&&!instruments.includes(o.pair)){instruments.push(o.pair);saveInstruments()}trades.push(o);save();render();
+pendingShotGroups={before:[emptyShot('H1')],after:[emptyShot('M5')]};renderShotGroup('before');renderShotGroup('after');
+$('#saved').textContent='Збережено ✓';setTimeout(()=>$('#saved').textContent='',1500)};
+$('#export').onclick=()=>{let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(trades,null,2)],{type:'application/json'}));a.download='trading-journal-backup.json';a.click()};$('#reset').onclick=()=>{localStorage.removeItem('tjv62');location.reload()};
+$('#csv').onchange=e=>{let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{alert('CSV import parser will be upgraded in v1.1. Your bundled journal is already preloaded in this build.')};r.readAsText(f)};
+init();setTodayDate();loadInstruments();loadEntryModels();initCalendarUI();
+
+// v6.4.2 — working lot calculator
+function calcLotSize(){
+  const get=id=>document.getElementById(id);
+  const pair=get('lcPair').value;
+  const balance=Math.max(0,parseFloat(get('lcBalance').value)||0);
+  const risk=Math.max(0,parseFloat(get('lcRisk').value)||0);
+  const stop=Math.max(0,parseFloat(get('lcStop').value)||0);
+  const price=Math.max(0,parseFloat(get('lcPrice').value)||0);
+  const money=balance*risk/100;
+  let pipPerLot=10;
+  const needsPrice=['USDJPY','USDCHF','USDCAD'].includes(pair);
+
+  if(needsPrice){
+    if(!price){
+      get('lcLots').innerHTML='— <small>lot</small>';
+      get('lcMoney').textContent='$'+money.toFixed(2);
+      get('lcPipValue').textContent='—';
+      get('lcStopOut').textContent=stop.toFixed(1)+' pips';
+      get('lcRiskOut').textContent=risk.toFixed(2)+'%';
+      get('lcNote').textContent='Введи поточну ціну '+pair+'.';
+      return;
+    }
+    pipPerLot=(pair==='USDJPY'?1000:10)/price;
+  }
+
+  const exact=stop ? money/(stop*pipPerLot) : 0;
+  const lots=Math.floor((exact+1e-10)*100)/100;
+  const pipValue=lots*pipPerLot;
+  const actualRisk=pipValue*stop;
+
+  get('lcLots').innerHTML=lots.toFixed(2)+' <small>lot</small>';
+  get('lcMoney').textContent='$'+money.toFixed(2);
+  get('lcPipValue').textContent='$'+pipValue.toFixed(2);
+  get('lcStopOut').textContent=stop.toFixed(1)+' pips';
+  get('lcRiskOut').textContent=risk.toFixed(2)+'%';
+  get('lcNote').textContent='Точний лот: '+exact.toFixed(3)+' → робочий: '+lots.toFixed(2)+' lot. Фактичний ризик ≈ $'+actualRisk.toFixed(2)+'.';
+}
+function setupLotCalculator(){
+  ['lcPair','lcBalance','lcRisk','lcStop','lcPrice'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(!el)return;
+    el.addEventListener('input',calcLotSize);
+    el.addEventListener('change',calcLotSize);
+  });
+  document.getElementById('lcCalculate')?.addEventListener('click',calcLotSize);
+  document.getElementById('lcReset')?.addEventListener('click',()=>{
+    document.getElementById('lcPair').value='EURUSD';
+    document.getElementById('lcBalance').value='2500';
+    document.getElementById('lcRisk').value='.5';
+    document.getElementById('lcStop').value='6.5';
+    document.getElementById('lcPrice').value='';
+    calcLotSize();
+  });
+  calcLotSize();
+}
+setupLotCalculator();
+
+</script></body></html>
