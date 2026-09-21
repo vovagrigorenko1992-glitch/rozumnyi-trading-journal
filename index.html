@@ -1624,28 +1624,17 @@ async function loadAccountData(){
   if(error)throw error;
   const cloud=(data||[]).map(x=>x.trade_data).filter(Boolean);
 
-  // Strict account isolation:
-  // Never import the old shared tjv62 cache into a newly signed-in account.
-  // Prefer that user's cloud rows; fall back only to that user's own cache.
-  const ownRaw=localStorage.getItem(userStorageKey(cloudUser.id));
-  let own=[];
-  try{own=ownRaw?JSON.parse(ownRaw):[]}catch(e){own=[]}
+  // Strict account isolation v2:
+  // For an authenticated account, Supabase is the source of truth.
+  // Never restore trades from legacy/shared or stale per-user browser cache.
+  // This prevents a new/test account from inheriting another account's trades.
+  trades=cloud;
 
-  if(cloud.length){
-    trades=cloud;
-  }else if(Array.isArray(own)&&own.length){
-    trades=own;
-  }else{
-    trades=[];
-  }
-
+  // Replace this account's browser cache with exactly what belongs to it in Supabase.
   localStorage.setItem(userStorageKey(cloudUser.id),JSON.stringify(trades));
   render();loadInstruments();loadEntryModels();
   cloudReady=true;
-
-  // Upload only this account's own cache, never the legacy shared cache.
-  if(!cloud.length && trades.length) await syncToCloud();
-  else setAuthUI(cloudUser.email||'Синхронізовано','ok');
+  setAuthUI(cloudUser.email||'Синхронізовано','ok');
 }
 async function clearCurrentAccountCloud(){
   if(!cloudUser||!sb)return;
