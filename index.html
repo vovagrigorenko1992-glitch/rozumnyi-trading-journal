@@ -1552,15 +1552,27 @@ init();setTodayDate();loadInstruments();loadEntryModels();initCalendarUI();
 // Cloud sync: Supabase + Google OAuth
 const SUPABASE_URL='https://qqshpilcwesnopdchwbn.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY='sb_publishable_ZpvRoNF1dmomlyNYLTN_9g_KoJ1rYlS';
-const sb=window.supabase?.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
+const sb=window.supabase?.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{
+  auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storage:window.localStorage}
+});
 let cloudUser=null,cloudTimer=null,cloudBusy=false,cloudReady=false;
 function setAuthUI(text,state=''){const s=document.getElementById('authStatus'),b=document.getElementById('authBtn');if(s)s.innerHTML='<i class="sync-dot '+state+'"></i>'+esc(text);if(b){b.textContent=cloudUser?'Вийти':'Увійти';b.classList.toggle('signed',!!cloudUser)}
   const box=b?.closest('.auth-box'),avatar=document.getElementById('authAvatar');
   if(box)box.classList.toggle('has-user',!!cloudUser);
+  const fallback=document.getElementById('authAvatarFallback');
   if(avatar&&cloudUser){
     const pic=cloudUser.user_metadata?.avatar_url||cloudUser.user_metadata?.picture||'';
-    if(pic){avatar.src=pic;avatar.style.display='block';box?.classList.remove('no-photo')}else{avatar.removeAttribute('src');avatar.style.display='none';box?.classList.add('no-photo')}
-  }else if(avatar){avatar.removeAttribute('src');avatar.style.display='none';box?.classList.remove('no-photo')}}
+    if(pic){
+      avatar.src=pic;avatar.style.display='block';
+      if(fallback)fallback.style.display='none';
+    }else{
+      avatar.removeAttribute('src');avatar.style.display='none';
+      if(fallback)fallback.style.display='flex';
+    }
+  }else{
+    if(avatar){avatar.removeAttribute('src');avatar.style.display='none'}
+    if(fallback)fallback.style.display='none';
+  }}
 function tradeKey(t){
   const id=String(t?.id||'').trim();
   if(id)return id;
@@ -1642,13 +1654,49 @@ async function clearCurrentAccountCloud(){
   localStorage.setItem(userStorageKey(cloudUser.id),'[]');
   render();loadInstruments();loadEntryModels();
 }
-async function initAuth(){if(!sb){setAuthUI('Supabase не завантажився');return}const {data:{session}}=await sb.auth.getSession();cloudUser=session?.user||null;if(cloudUser){setAuthUI(cloudUser.email||'Google','ok');try{await loadAccountData()}catch(e){console.error(e);setAuthUI('Помилка синхронізації')}}else{cloudReady=false;setAuthUI('Локально')}sb.auth.onAuthStateChange((event,session)=>{const prev=cloudUser?.id;cloudUser=session?.user||null;if(cloudUser&&cloudUser.id!==prev)setTimeout(()=>loadAccountData().catch(e=>{console.error(e);setAuthUI('Помилка синхронізації')}),0);if(!cloudUser){cloudReady=false;setAuthUI('Локально')}});document.getElementById('authBtn')?.addEventListener('click',async()=>{if(cloudUser){
-      await sb.auth.signOut();
-      cloudReady=false;
+async function initAuth(){
+  const authBtn=document.getElementById('authBtn');
+
+  // Bind immediately, so the button never becomes dead while session/cloud data is loading.
+  authBtn?.addEventListener('click',async()=>{
+    if(cloudUser){
+      try{await sb.auth.signOut()}catch(e){console.error(e)}
+      cloudUser=null;cloudReady=false;setAuthUI('Локально');
       try{trades=JSON.parse(localStorage.getItem('tjv62')||'[]')}catch(e){trades=[]}
       render();loadInstruments();loadEntryModels();
-      return
-    }openAuthModal();});
+      return;
+    }
+    openAuthModal();
+  });
+
+  if(!sb){setAuthUI('Supabase не завантажився');return}
+
+  sb.auth.onAuthStateChange((event,session)=>{
+    const prev=cloudUser?.id;
+    cloudUser=session?.user||null;
+    setAuthUI(cloudUser?(cloudUser.email||'Увійшли'):'Локально',cloudUser?'ok':'');
+    if(cloudUser&&cloudUser.id!==prev){
+      setTimeout(()=>loadAccountData().catch(e=>{
+        console.error(e);setAuthUI('Помилка синхронізації');
+      }),0);
+    }
+    if(!cloudUser)cloudReady=false;
+  });
+
+  try{
+    const {data,error}=await sb.auth.getSession();
+    if(error)throw error;
+    cloudUser=data?.session?.user||null;
+    setAuthUI(cloudUser?(cloudUser.email||'Увійшли'):'Локально',cloudUser?'ok':'');
+    if(cloudUser){
+      try{await loadAccountData()}
+      catch(e){console.error(e);setAuthUI('Помилка синхронізації')}
+    }else cloudReady=false;
+  }catch(e){
+    console.error('Auth init error',e);
+    cloudUser=null;cloudReady=false;setAuthUI('Локально');
+  }
+
   document.getElementById('lcCalculate')?.addEventListener('click',calcLotSize);
   document.getElementById('lcReset')?.addEventListener('click',()=>{
     document.getElementById('lcPair').value='EURUSD';
