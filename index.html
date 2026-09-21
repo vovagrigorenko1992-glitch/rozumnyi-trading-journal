@@ -869,6 +869,10 @@ header .tabs button{padding:10px 14px!important}
 .auth-avatar{width:38px;height:38px;border-radius:50%;object-fit:cover;border:2px solid #2ecc71;background:#172638;display:none}
 .auth-box.has-user .auth-avatar{display:block}
 .auth-box.has-user .auth-status{display:none!important}
+
+.auth-avatar-fallback{width:38px;height:38px;border-radius:50%;border:2px solid #2ecc71;background:#172638;color:#dce8f6;display:none;align-items:center;justify-content:center;font-size:21px;line-height:1}
+.auth-box.has-user.no-photo .auth-avatar{display:none!important}
+.auth-box.has-user.no-photo .auth-avatar-fallback{display:flex}
 </style><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script></head><body>
 <div class="market-art-bg" aria-hidden="true">
   <div class="market-chart-line"></div>
@@ -885,7 +889,7 @@ header .tabs button{padding:10px 14px!important}
     <i class="up"></i><i class="down"></i><i class="up"></i>
   </div>
 </div>
-<header><div class='wrap top'><div class='brand-lockup'><div class='brand'>Розумний трейдинг-журнал</div><div class='brand-tagline'><span class='mini-candles'><i></i><i></i><i></i></span><b>Трейдинг</b><span>|</span><em>Не кнопка бабло</em></div></div><div class='auth-box'><img id='authAvatar' class='auth-avatar' alt='Аватар'><span id='authStatus' class='auth-status'><i class='sync-dot'></i>Локально</span><button id='authBtn' class='auth-btn' type='button'>Увійти</button></div><nav class='tabs'><button data-tab='dash' class='active'>Дашборд</button><button data-tab='journal'>Журнал</button><button data-tab='add'>+ Нова угода</button><button data-tab='analytics'>Аналітика</button><button data-tab='calculator'>Калькулятор</button><button data-tab='settings'>Налаштування</button></nav></div></header><main>
+<header><div class='wrap top'><div class='brand-lockup'><div class='brand'>Розумний трейдинг-журнал</div><div class='brand-tagline'><span class='mini-candles'><i></i><i></i><i></i></span><b>Трейдинг</b><span>|</span><em>Не кнопка бабло</em></div></div><div class='auth-box'><img id='authAvatar' class='auth-avatar' alt='Аватар'><span id='authAvatarFallback' class='auth-avatar-fallback' aria-label='Аватар'>👤</span><span id='authStatus' class='auth-status'><i class='sync-dot'></i>Локально</span><button id='authBtn' class='auth-btn' type='button'>Увійти</button></div><nav class='tabs'><button data-tab='dash' class='active'>Дашборд</button><button data-tab='journal'>Журнал</button><button data-tab='add'>+ Нова угода</button><button data-tab='analytics'>Аналітика</button><button data-tab='calculator'>Калькулятор</button><button data-tab='settings'>Налаштування</button></nav></div></header><main>
 <section id='dash' class='active'><h2>Дашборд</h2><div id='metrics' class='grid'></div><div class='dashboard-main'>
   <div class='dashboard-calendar-col'>
     <div class='mini-calendar-slot'><div class='card news-calendar'>
@@ -1016,7 +1020,7 @@ let trades=[]; const $=s=>document.querySelector(s), $$=s=>[...document.querySel
 function parseSeedRow(x){let rr=parseFloat(String(x['RR']).replace(',','.'))||0; return {id:x['№'],date:x['Дата, час'],session:x['Сесія'],pair:x['Пара'],model:x['Multi-select']||x['Сетап'],side:x['Позиція'],risk:parseFloat(String(x['Ризик, %']).replace('%','').replace(',','.'))||0,r:rr,result:rr>0?'TP':rr<0?'SL':'BE',notes:x['Примітки']||'',trend:'',sweep:'',grade:'',liquidity:'',before:x['H1']||x['H4']||'',after:x['m5']||x['m15']||'',h4:x['H4']||'',h1:x['H1']||'',m15:x['m15']||'',m5:x['m5']||''}}
 async function init(){let saved=null;for(let k of ['tjv62','tjv62','tjv34','tjv33','tjv32','tjv31','tjv30','tjv29','tjv28','tjv27','tjv26','tjv25','tjv24','tjv23','tjv22']){let v=localStorage.getItem(k);if(v){saved=v;break}}if(saved){try{trades=JSON.parse(saved)}catch(e){trades=[]}}if(!trades.length){try{let seed=JSON.parse(document.getElementById('seed-data').textContent);trades=seed.map(parseSeedRow).reverse()}catch(e){console.error(e);trades=[]}}save();render()}
 function setTodayDate(){let el=document.querySelector("#tradeForm input[name='date']");if(!el)return;let d=new Date(),y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');if(!el.value)el.value=`${y}-${m}-${day}`;if(el.showPicker)el.addEventListener('click',()=>{try{el.showPicker()}catch(e){}})}
-function save(){localStorage.setItem('tjv62',JSON.stringify(trades));scheduleCloudSync()}
+function save(){if(cloudUser)localStorage.setItem(userStorageKey(cloudUser.id),JSON.stringify(trades));else localStorage.setItem('tjv62',JSON.stringify(trades));scheduleCloudSync()}
 function stats(arr=trades){let done=arr.filter(t=>['TP','SL','BE'].includes(t.result));let wins=done.filter(t=>+t.r>0);let losses=done.filter(t=>+t.r<0);let sum=done.reduce((a,t)=>a+(+t.r||0),0);let income=done.reduce((a,t)=>a+((+t.r||0)*(+t.risk||0)),0);let wr=done.length?wins.length/done.length*100:0;let gp=wins.reduce((a,t)=>a+(+t.r||0),0),gl=Math.abs(losses.reduce((a,t)=>a+(+t.r||0),0));return{n:done.length,w:wins.length,l:losses.length,sum,income,wr,pf:gl?gp/gl:0,exp:done.length?sum/done.length:0}}
 function render(){let s=stats();let vals=[['Угоди',s.n],['Winrate',s.wr.toFixed(1)+'%'],['Сумарний R',(s.sum>=0?'+':'')+s.sum.toFixed(1)+'R'],['Середній R',s.exp.toFixed(2)+'R'],['Дохід',(s.income>=0?'+':'')+s.income.toFixed(2)+'%']];
 let metricInfo={
@@ -1555,13 +1559,96 @@ function setAuthUI(text,state=''){const s=document.getElementById('authStatus'),
   if(box)box.classList.toggle('has-user',!!cloudUser);
   if(avatar&&cloudUser){
     const pic=cloudUser.user_metadata?.avatar_url||cloudUser.user_metadata?.picture||'';
-    if(pic){avatar.src=pic;avatar.style.display='block'}else{avatar.removeAttribute('src');avatar.style.display='none'}
-  }else if(avatar){avatar.removeAttribute('src');avatar.style.display='none'}}
-function tradeKey(t){const id=String(t?.id||'').trim();if(id)return id;return [t?.date,t?.pair,t?.session,t?.side,t?.model,t?.r].map(x=>String(x??'')).join('|')}
-function scheduleCloudSync(){if(!cloudReady||!cloudUser||!sb)return;clearTimeout(cloudTimer);cloudTimer=setTimeout(()=>syncToCloud().catch(e=>{console.error(e);setAuthUI('Помилка синхронізації')}),900)}
-async function syncToCloud(){if(!cloudReady||!cloudUser||!sb||cloudBusy)return;cloudBusy=true;setAuthUI('Синхронізація…','busy');try{const {data:rows,error:readErr}=await sb.from('trades').select('id,trade_data').eq('user_id',cloudUser.id);if(readErr)throw readErr;const existing=new Map((rows||[]).map(r=>[tradeKey(r.trade_data),r]));const localKeys=new Set(trades.map(tradeKey));const toDelete=(rows||[]).filter(r=>!localKeys.has(tradeKey(r.trade_data))).map(r=>r.id);if(toDelete.length){const {error}=await sb.from('trades').delete().in('id',toDelete).eq('user_id',cloudUser.id);if(error)throw error}for(const t of trades){const old=existing.get(tradeKey(t));if(old){const {error}=await sb.from('trades').update({trade_data:t,updated_at:new Date().toISOString()}).eq('id',old.id).eq('user_id',cloudUser.id);if(error)throw error}else{const {error}=await sb.from('trades').insert({user_id:cloudUser.id,trade_data:t});if(error)throw error}}setAuthUI(cloudUser.email||'Синхронізовано','ok')}finally{cloudBusy=false}}
-async function loadAndMergeCloud(){if(!cloudUser||!sb)return;setAuthUI('Завантаження…','busy');const {data,error}=await sb.from('trades').select('id,trade_data,updated_at').eq('user_id',cloudUser.id);if(error)throw error;const cloud=(data||[]).map(x=>x.trade_data).filter(Boolean);const merged=new Map();trades.forEach(t=>merged.set(tradeKey(t),t));cloud.forEach(t=>{const k=tradeKey(t);if(!merged.has(k))merged.set(k,t)});trades=[...merged.values()];localStorage.setItem('tjv62',JSON.stringify(trades));render();loadInstruments();loadEntryModels();cloudReady=true;await syncToCloud()}
-function openAuthModal(){const m=document.getElementById('authModal');if(!m)return;m.classList.add('open')}function closeAuthModal(){document.getElementById('authModal')?.classList.remove('open');authMessage('')}function authMessage(msg,type=''){const e=document.getElementById('authMsg');if(e){e.textContent=msg||'';e.className='auth-msg'+(type?' '+type:'')}}function authCredentials(){return{email:(document.getElementById('authEmail')?.value||'').trim(),password:document.getElementById('authPassword')?.value||''}}async function googleLogin(){const{error}=await sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:window.location.origin+window.location.pathname}});if(error)authMessage(error.message,'err')}async function emailLogin(){const{email,password}=authCredentials();if(!email||!password)return authMessage('Введи email і пароль.','err');const{error}=await sb.auth.signInWithPassword({email,password});if(error)return authMessage(error.message,'err');closeAuthModal()}async function emailSignup(){const{email,password}=authCredentials();if(!email||!password)return authMessage('Введи email і пароль.','err');if(password.length<6)return authMessage('Пароль має містити щонайменше 6 символів.','err');const{data,error}=await sb.auth.signUp({email,password,options:{emailRedirectTo:window.location.origin+window.location.pathname}});if(error)return authMessage(error.message,'err');authMessage(data?.session?'Акаунт створено. Вхід виконано.':'Готово. Перевір пошту та підтвердь реєстрацію.','ok')}async function resetPassword(){const email=(document.getElementById('authEmail')?.value||'').trim();if(!email)return authMessage('Спочатку введи email.','err');const{error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin+window.location.pathname});authMessage(error?error.message:'Лист для відновлення пароля надіслано.',error?'err':'ok')}function bindAuthModal(){document.getElementById('authClose')?.addEventListener('click',closeAuthModal);document.getElementById('authModal')?.addEventListener('click',e=>{if(e.target?.id==='authModal')closeAuthModal()});document.getElementById('googleLoginBtn')?.addEventListener('click',googleLogin);document.getElementById('emailLoginBtn')?.addEventListener('click',emailLogin);document.getElementById('signupBtn')?.addEventListener('click',emailSignup);document.getElementById('resetBtn')?.addEventListener('click',resetPassword)}async function initAuth(){if(!sb){setAuthUI('Supabase не завантажився');return}const {data:{session}}=await sb.auth.getSession();cloudUser=session?.user||null;if(cloudUser){setAuthUI(cloudUser.email||'Google','ok');try{await loadAndMergeCloud()}catch(e){console.error(e);setAuthUI('Помилка синхронізації')}}else{cloudReady=false;setAuthUI('Локально')}sb.auth.onAuthStateChange((event,session)=>{const prev=cloudUser?.id;cloudUser=session?.user||null;if(cloudUser&&cloudUser.id!==prev)setTimeout(()=>loadAndMergeCloud().catch(e=>{console.error(e);setAuthUI('Помилка синхронізації')}),0);if(!cloudUser){cloudReady=false;setAuthUI('Локально')}});document.getElementById('authBtn')?.addEventListener('click',async()=>{if(cloudUser){await sb.auth.signOut();return}openAuthModal();});
+    if(pic){avatar.src=pic;avatar.style.display='block';box?.classList.remove('no-photo')}else{avatar.removeAttribute('src');avatar.style.display='none';box?.classList.add('no-photo')}
+  }else if(avatar){avatar.removeAttribute('src');avatar.style.display='none';box?.classList.remove('no-photo')}}
+function tradeKey(t){
+  const id=String(t?.id||'').trim();
+  if(id)return id;
+  return [t?.date,t?.pair,t?.session,t?.side,t?.model,t?.r].map(x=>String(x??'')).join('|');
+}
+function userStorageKey(uid){return 'tjv62_user_'+uid}
+function saveUserCache(){
+  if(cloudUser) localStorage.setItem(userStorageKey(cloudUser.id),JSON.stringify(trades));
+}
+function scheduleCloudSync(){
+  if(!cloudReady||!cloudUser||!sb)return;
+  saveUserCache();
+  clearTimeout(cloudTimer);
+  cloudTimer=setTimeout(()=>syncToCloud().catch(e=>{console.error(e);setAuthUI('Помилка синхронізації')}),900);
+}
+async function syncToCloud(){
+  if(!cloudReady||!cloudUser||!sb||cloudBusy)return;
+  cloudBusy=true;setAuthUI('Синхронізація…','busy');
+  try{
+    const {data:rows,error:readErr}=await sb.from('trades').select('id,trade_data').eq('user_id',cloudUser.id);
+    if(readErr)throw readErr;
+    const existing=new Map((rows||[]).map(r=>[tradeKey(r.trade_data),r]));
+    const localKeys=new Set(trades.map(tradeKey));
+    const toDelete=(rows||[]).filter(r=>!localKeys.has(tradeKey(r.trade_data))).map(r=>r.id);
+    if(toDelete.length){
+      const {error}=await sb.from('trades').delete().in('id',toDelete).eq('user_id',cloudUser.id);
+      if(error)throw error;
+    }
+    for(const t of trades){
+      const old=existing.get(tradeKey(t));
+      if(old){
+        const {error}=await sb.from('trades').update({trade_data:t,updated_at:new Date().toISOString()}).eq('id',old.id).eq('user_id',cloudUser.id);
+        if(error)throw error;
+      }else{
+        const {error}=await sb.from('trades').insert({user_id:cloudUser.id,trade_data:t});
+        if(error)throw error;
+      }
+    }
+    saveUserCache();
+    setAuthUI(cloudUser.email||'Синхронізовано','ok');
+  }finally{cloudBusy=false}
+}
+async function loadAccountData(){
+  if(!cloudUser||!sb)return;
+  cloudReady=false;setAuthUI('Завантаження…','busy');
+
+  const {data,error}=await sb.from('trades').select('id,trade_data,updated_at').eq('user_id',cloudUser.id);
+  if(error)throw error;
+  const cloud=(data||[]).map(x=>x.trade_data).filter(Boolean);
+
+  // Strict account isolation:
+  // Never import the old shared tjv62 cache into a newly signed-in account.
+  // Prefer that user's cloud rows; fall back only to that user's own cache.
+  const ownRaw=localStorage.getItem(userStorageKey(cloudUser.id));
+  let own=[];
+  try{own=ownRaw?JSON.parse(ownRaw):[]}catch(e){own=[]}
+
+  if(cloud.length){
+    trades=cloud;
+  }else if(Array.isArray(own)&&own.length){
+    trades=own;
+  }else{
+    trades=[];
+  }
+
+  localStorage.setItem(userStorageKey(cloudUser.id),JSON.stringify(trades));
+  render();loadInstruments();loadEntryModels();
+  cloudReady=true;
+
+  // Upload only this account's own cache, never the legacy shared cache.
+  if(!cloud.length && trades.length) await syncToCloud();
+  else setAuthUI(cloudUser.email||'Синхронізовано','ok');
+}
+async function clearCurrentAccountCloud(){
+  if(!cloudUser||!sb)return;
+  const {error}=await sb.from('trades').delete().eq('user_id',cloudUser.id);
+  if(error)throw error;
+  trades=[];
+  localStorage.setItem(userStorageKey(cloudUser.id),'[]');
+  render();loadInstruments();loadEntryModels();
+}
+async function initAuth(){if(!sb){setAuthUI('Supabase не завантажився');return}const {data:{session}}=await sb.auth.getSession();cloudUser=session?.user||null;if(cloudUser){setAuthUI(cloudUser.email||'Google','ok');try{await loadAccountData()}catch(e){console.error(e);setAuthUI('Помилка синхронізації')}}else{cloudReady=false;setAuthUI('Локально')}sb.auth.onAuthStateChange((event,session)=>{const prev=cloudUser?.id;cloudUser=session?.user||null;if(cloudUser&&cloudUser.id!==prev)setTimeout(()=>loadAccountData().catch(e=>{console.error(e);setAuthUI('Помилка синхронізації')}),0);if(!cloudUser){cloudReady=false;setAuthUI('Локально')}});document.getElementById('authBtn')?.addEventListener('click',async()=>{if(cloudUser){
+      await sb.auth.signOut();
+      cloudReady=false;
+      try{trades=JSON.parse(localStorage.getItem('tjv62')||'[]')}catch(e){trades=[]}
+      render();loadInstruments();loadEntryModels();
+      return
+    }openAuthModal();});
   document.getElementById('lcCalculate')?.addEventListener('click',calcLotSize);
   document.getElementById('lcReset')?.addEventListener('click',()=>{
     document.getElementById('lcPair').value='EURUSD';
