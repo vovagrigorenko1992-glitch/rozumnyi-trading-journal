@@ -1018,7 +1018,7 @@ header .tabs button{padding:10px 14px!important}
 <script>
 let trades=[]; const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 function parseSeedRow(x){let rr=parseFloat(String(x['RR']).replace(',','.'))||0; return {id:x['№'],date:x['Дата, час'],session:x['Сесія'],pair:x['Пара'],model:x['Multi-select']||x['Сетап'],side:x['Позиція'],risk:parseFloat(String(x['Ризик, %']).replace('%','').replace(',','.'))||0,r:rr,result:rr>0?'TP':rr<0?'SL':'BE',notes:x['Примітки']||'',trend:'',sweep:'',grade:'',liquidity:'',before:x['H1']||x['H4']||'',after:x['m5']||x['m15']||'',h4:x['H4']||'',h1:x['H1']||'',m15:x['m15']||'',m5:x['m5']||''}}
-async function init(){let saved=null;for(let k of ['tjv62','tjv62','tjv34','tjv33','tjv32','tjv31','tjv30','tjv29','tjv28','tjv27','tjv26','tjv25','tjv24','tjv23','tjv22']){let v=localStorage.getItem(k);if(v){saved=v;break}}if(saved){try{trades=JSON.parse(saved)}catch(e){trades=[]}}if(!trades.length){try{let seed=JSON.parse(document.getElementById('seed-data').textContent);trades=seed.map(parseSeedRow).reverse()}catch(e){console.error(e);trades=[]}}save();render()}
+async function init(){/* Account isolation v3: anonymous visitors start empty. Account data is loaded only after Supabase auth resolves. */ trades=[];render()}
 function setTodayDate(){let el=document.querySelector("#tradeForm input[name='date']");if(!el)return;let d=new Date(),y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');if(!el.value)el.value=`${y}-${m}-${day}`;if(el.showPicker)el.addEventListener('click',()=>{try{el.showPicker()}catch(e){}})}
 function save(){if(cloudUser)localStorage.setItem(userStorageKey(cloudUser.id),JSON.stringify(trades));else localStorage.setItem('tjv62',JSON.stringify(trades));scheduleCloudSync()}
 function stats(arr=trades){let done=arr.filter(t=>['TP','SL','BE'].includes(t.result));let wins=done.filter(t=>+t.r>0);let losses=done.filter(t=>+t.r<0);let sum=done.reduce((a,t)=>a+(+t.r||0),0);let income=done.reduce((a,t)=>a+((+t.r||0)*(+t.risk||0)),0);let wr=done.length?wins.length/done.length*100:0;let gp=wins.reduce((a,t)=>a+(+t.r||0),0),gl=Math.abs(losses.reduce((a,t)=>a+(+t.r||0),0));return{n:done.length,w:wins.length,l:losses.length,sum,income,wr,pf:gl?gp/gl:0,exp:done.length?sum/done.length:0}}
@@ -1658,7 +1658,7 @@ async function handleAuthButton(){
   if(cloudUser){
     try{await sb?.auth.signOut()}catch(e){console.error(e)}
     cloudUser=null;cloudReady=false;setAuthUI('Локально');
-    try{trades=JSON.parse(localStorage.getItem('tjv62')||'[]')}catch(e){trades=[]}
+    trades=[];
     render();loadInstruments();loadEntryModels();
     return;
   }
@@ -1690,7 +1690,7 @@ async function initAuth(){
     if(cloudUser){
       try{await loadAccountData()}
       catch(e){console.error(e);setAuthUI('Помилка синхронізації')}
-    }else cloudReady=false;
+    }else{cloudReady=false;trades=[];render();}
   }catch(e){
     console.error('Auth init error',e);
     cloudUser=null;cloudReady=false;setAuthUI('Локально');
