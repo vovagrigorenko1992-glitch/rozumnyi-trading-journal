@@ -857,6 +857,14 @@ header .tabs button{padding:10px 14px!important}
 @media(max-width:1100px){header .wrap.top{padding:12px 20px!important}}
 @media(max-width:650px){header .wrap.top{padding:11px 14px!important}}
 .auth-box{display:flex;align-items:center;gap:8px;margin-left:auto}.auth-status{max-width:210px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted);font-size:12px}.auth-btn{border:1px solid #30445a;background:#142131;color:#dce8f6;padding:8px 11px;border-radius:10px;cursor:pointer;font-weight:700}.auth-btn:hover{border-color:#4c8dff}.auth-btn.signed{background:#13291f;border-color:#285b42;color:#70dfa7}.sync-dot{width:7px;height:7px;border-radius:50%;display:inline-block;background:#64748b;margin-right:5px}.sync-dot.ok{background:#2ecc71}.sync-dot.busy{background:#f5b942}@media(max-width:900px){.auth-status{display:none}.auth-box{order:3;width:100%;justify-content:flex-end}}
+.auth-modal{position:fixed;inset:0;background:rgba(2,8,16,.78);display:none;align-items:center;justify-content:center;padding:18px;z-index:10050;backdrop-filter:blur(7px)}.auth-modal.open{display:flex}.auth-card{width:min(430px,100%);background:#101923;border:1px solid #2a3a4d;border-radius:18px;padding:22px;box-shadow:0 24px 80px rgba(0,0,0,.5);position:relative}.auth-card h2{margin:0 0 16px;font-size:22px}.auth-close{position:absolute;right:14px;top:12px;border:0;background:transparent;color:#9fb0c4;font-size:26px;cursor:pointer}.auth-google,.auth-primary{width:100%;padding:12px;border-radius:11px;font-weight:800;cursor:pointer}.auth-google{border:1px solid #38516c;background:#172638;color:#eef6ff}.auth-primary{border:0;background:#3b82f6;color:#fff}.auth-sep{display:flex;align-items:center;gap:10px;color:#718297;font-size:12px;margin:15px 0}.auth-sep:before,.auth-sep:after{content:"";height:1px;background:#283748;flex:1}.auth-field{display:block;margin:10px 0}.auth-field span{display:block;color:#9fb0c4;font-size:12px;margin-bottom:5px}.auth-field input{width:100%;box-sizing:border-box;border:1px solid #30445a;background:#0b131d;color:#edf5ff;border-radius:10px;padding:11px 12px}.auth-links{display:flex;justify-content:space-between;gap:12px;margin-top:13px}.auth-link{border:0;background:transparent;color:#78aefc;padding:0;cursor:pointer;font-size:13px}.auth-msg{min-height:18px;margin-top:12px;font-size:12px;color:#9fb0c4}.auth-msg.err{color:#ff7b86}.auth-msg.ok{color:#6ee7a8}@media(max-width:600px){.auth-card{padding:20px 16px}.auth-links{flex-direction:column;align-items:flex-start}}/* Auth block at far right on desktop */
+@media(min-width:901px){
+  header .tabs{order:2;flex:1 1 auto}
+  header .auth-box{order:3;margin-left:auto;flex:0 0 auto}
+}
+
+/* Compact logged-out auth: hide local status text */
+.auth-box:not(:has(.auth-btn.signed)) .auth-status{display:none}
 </style><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script></head><body>
 <div class="market-art-bg" aria-hidden="true">
   <div class="market-chart-line"></div>
@@ -873,7 +881,7 @@ header .tabs button{padding:10px 14px!important}
     <i class="up"></i><i class="down"></i><i class="up"></i>
   </div>
 </div>
-<header><div class='wrap top'><div class='brand-lockup'><div class='brand'>Розумний трейдинг-журнал</div><div class='brand-tagline'><span class='mini-candles'><i></i><i></i><i></i></span><b>Трейдинг</b><span>|</span><em>Не кнопка бабло</em></div></div><div class='auth-box'><span id='authStatus' class='auth-status'><i class='sync-dot'></i>Локально</span><button id='authBtn' class='auth-btn' type='button'>Увійти через Google</button></div><nav class='tabs'><button data-tab='dash' class='active'>Дашборд</button><button data-tab='journal'>Журнал</button><button data-tab='add'>+ Нова угода</button><button data-tab='analytics'>Аналітика</button><button data-tab='calculator'>Калькулятор</button><button data-tab='settings'>Налаштування</button></nav></div></header><main>
+<header><div class='wrap top'><div class='brand-lockup'><div class='brand'>Розумний трейдинг-журнал</div><div class='brand-tagline'><span class='mini-candles'><i></i><i></i><i></i></span><b>Трейдинг</b><span>|</span><em>Не кнопка бабло</em></div></div><div class='auth-box'><span id='authStatus' class='auth-status'><i class='sync-dot'></i>Локально</span><button id='authBtn' class='auth-btn' type='button'>Увійти</button></div><nav class='tabs'><button data-tab='dash' class='active'>Дашборд</button><button data-tab='journal'>Журнал</button><button data-tab='add'>+ Нова угода</button><button data-tab='analytics'>Аналітика</button><button data-tab='calculator'>Калькулятор</button><button data-tab='settings'>Налаштування</button></nav></div></header><main>
 <section id='dash' class='active'><h2>Дашборд</h2><div id='metrics' class='grid'></div><div class='dashboard-main'>
   <div class='dashboard-calendar-col'>
     <div class='mini-calendar-slot'><div class='card news-calendar'>
@@ -1538,59 +1546,12 @@ const SUPABASE_URL='https://qqshpilcwesnopdchwbn.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY='sb_publishable_ZpvRoNF1dmomlyNYLTN_9g_KoJ1rYlS';
 const sb=window.supabase?.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
 let cloudUser=null,cloudTimer=null,cloudBusy=false,cloudReady=false;
-function setAuthUI(text,state=''){const s=document.getElementById('authStatus'),b=document.getElementById('authBtn');if(s)s.innerHTML='<i class="sync-dot '+state+'"></i>'+esc(text);if(b){b.textContent=cloudUser?'Вийти':'Увійти через Google';b.classList.toggle('signed',!!cloudUser)}}
+function setAuthUI(text,state=''){const s=document.getElementById('authStatus'),b=document.getElementById('authBtn');if(s)s.innerHTML='<i class="sync-dot '+state+'"></i>'+esc(text);if(b){b.textContent=cloudUser?'Вийти':'Увійти';b.classList.toggle('signed',!!cloudUser)}}
 function tradeKey(t){const id=String(t?.id||'').trim();if(id)return id;return [t?.date,t?.pair,t?.session,t?.side,t?.model,t?.r].map(x=>String(x??'')).join('|')}
 function scheduleCloudSync(){if(!cloudReady||!cloudUser||!sb)return;clearTimeout(cloudTimer);cloudTimer=setTimeout(()=>syncToCloud().catch(e=>{console.error(e);setAuthUI('Помилка синхронізації')}),900)}
 async function syncToCloud(){if(!cloudReady||!cloudUser||!sb||cloudBusy)return;cloudBusy=true;setAuthUI('Синхронізація…','busy');try{const {data:rows,error:readErr}=await sb.from('trades').select('id,trade_data').eq('user_id',cloudUser.id);if(readErr)throw readErr;const existing=new Map((rows||[]).map(r=>[tradeKey(r.trade_data),r]));const localKeys=new Set(trades.map(tradeKey));const toDelete=(rows||[]).filter(r=>!localKeys.has(tradeKey(r.trade_data))).map(r=>r.id);if(toDelete.length){const {error}=await sb.from('trades').delete().in('id',toDelete).eq('user_id',cloudUser.id);if(error)throw error}for(const t of trades){const old=existing.get(tradeKey(t));if(old){const {error}=await sb.from('trades').update({trade_data:t,updated_at:new Date().toISOString()}).eq('id',old.id).eq('user_id',cloudUser.id);if(error)throw error}else{const {error}=await sb.from('trades').insert({user_id:cloudUser.id,trade_data:t});if(error)throw error}}setAuthUI(cloudUser.email||'Синхронізовано','ok')}finally{cloudBusy=false}}
 async function loadAndMergeCloud(){if(!cloudUser||!sb)return;setAuthUI('Завантаження…','busy');const {data,error}=await sb.from('trades').select('id,trade_data,updated_at').eq('user_id',cloudUser.id);if(error)throw error;const cloud=(data||[]).map(x=>x.trade_data).filter(Boolean);const merged=new Map();trades.forEach(t=>merged.set(tradeKey(t),t));cloud.forEach(t=>{const k=tradeKey(t);if(!merged.has(k))merged.set(k,t)});trades=[...merged.values()];localStorage.setItem('tjv62',JSON.stringify(trades));render();loadInstruments();loadEntryModels();cloudReady=true;await syncToCloud()}
-async function initAuth(){if(!sb){setAuthUI('Supabase не завантажився');return}const {data:{session}}=await sb.auth.getSession();cloudUser=session?.user||null;if(cloudUser){setAuthUI(cloudUser.email||'Google','ok');try{await loadAndMergeCloud()}catch(e){console.error(e);setAuthUI('Помилка синхронізації')}}else{cloudReady=false;setAuthUI('Локально')}sb.auth.onAuthStateChange((event,session)=>{const prev=cloudUser?.id;cloudUser=session?.user||null;if(cloudUser&&cloudUser.id!==prev)setTimeout(()=>loadAndMergeCloud().catch(e=>{console.error(e);setAuthUI('Помилка синхронізації')}),0);if(!cloudUser){cloudReady=false;setAuthUI('Локально')}});document.getElementById('authBtn')?.addEventListener('click',async()=>{if(cloudUser){await sb.auth.signOut();return}const {error}=await sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:window.location.origin+window.location.pathname}});if(error){console.error(error);alert('Не вдалося відкрити вхід Google: '+error.message)}})}
-
-initAuth();
-
-// v6.4.2 — working lot calculator
-function calcLotSize(){
-  const get=id=>document.getElementById(id);
-  const pair=get('lcPair').value;
-  const balance=Math.max(0,parseFloat(get('lcBalance').value)||0);
-  const risk=Math.max(0,parseFloat(get('lcRisk').value)||0);
-  const stop=Math.max(0,parseFloat(get('lcStop').value)||0);
-  const price=Math.max(0,parseFloat(get('lcPrice').value)||0);
-  const money=balance*risk/100;
-  let pipPerLot=10;
-  const needsPrice=['USDJPY','USDCHF','USDCAD'].includes(pair);
-
-  if(needsPrice){
-    if(!price){
-      get('lcLots').innerHTML='— <small>lot</small>';
-      get('lcMoney').textContent='$'+money.toFixed(2);
-      get('lcPipValue').textContent='—';
-      get('lcStopOut').textContent=stop.toFixed(1)+' pips';
-      get('lcRiskOut').textContent=risk.toFixed(2)+'%';
-      get('lcNote').textContent='Введи поточну ціну '+pair+'.';
-      return;
-    }
-    pipPerLot=(pair==='USDJPY'?1000:10)/price;
-  }
-
-  const exact=stop ? money/(stop*pipPerLot) : 0;
-  const lots=Math.floor((exact+1e-10)*100)/100;
-  const pipValue=lots*pipPerLot;
-  const actualRisk=pipValue*stop;
-
-  get('lcLots').innerHTML=lots.toFixed(2)+' <small>lot</small>';
-  get('lcMoney').textContent='$'+money.toFixed(2);
-  get('lcPipValue').textContent='$'+pipValue.toFixed(2);
-  get('lcStopOut').textContent=stop.toFixed(1)+' pips';
-  get('lcRiskOut').textContent=risk.toFixed(2)+'%';
-  get('lcNote').textContent='Точний лот: '+exact.toFixed(3)+' → робочий: '+lots.toFixed(2)+' lot. Фактичний ризик ≈ $'+actualRisk.toFixed(2)+'.';
-}
-function setupLotCalculator(){
-  ['lcPair','lcBalance','lcRisk','lcStop','lcPrice'].forEach(id=>{
-    const el=document.getElementById(id);
-    if(!el)return;
-    el.addEventListener('input',calcLotSize);
-    el.addEventListener('change',calcLotSize);
-  });
+function openAuthModal(){const m=document.getElementById('authModal');if(!m)return;m.classList.add('open')}function closeAuthModal(){document.getElementById('authModal')?.classList.remove('open');authMessage('')}function authMessage(msg,type=''){const e=document.getElementById('authMsg');if(e){e.textContent=msg||'';e.className='auth-msg'+(type?' '+type:'')}}function authCredentials(){return{email:(document.getElementById('authEmail')?.value||'').trim(),password:document.getElementById('authPassword')?.value||''}}async function googleLogin(){const{error}=await sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:window.location.origin+window.location.pathname}});if(error)authMessage(error.message,'err')}async function emailLogin(){const{email,password}=authCredentials();if(!email||!password)return authMessage('Введи email і пароль.','err');const{error}=await sb.auth.signInWithPassword({email,password});if(error)return authMessage(error.message,'err');closeAuthModal()}async function emailSignup(){const{email,password}=authCredentials();if(!email||!password)return authMessage('Введи email і пароль.','err');if(password.length<6)return authMessage('Пароль має містити щонайменше 6 символів.','err');const{data,error}=await sb.auth.signUp({email,password,options:{emailRedirectTo:window.location.origin+window.location.pathname}});if(error)return authMessage(error.message,'err');authMessage(data?.session?'Акаунт створено. Вхід виконано.':'Готово. Перевір пошту та підтвердь реєстрацію.','ok')}async function resetPassword(){const email=(document.getElementById('authEmail')?.value||'').trim();if(!email)return authMessage('Спочатку введи email.','err');const{error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin+window.location.pathname});authMessage(error?error.message:'Лист для відновлення пароля надіслано.',error?'err':'ok')}function bindAuthModal(){document.getElementById('authClose')?.addEventListener('click',closeAuthModal);document.getElementById('authModal')?.addEventListener('click',e=>{if(e.target?.id==='authModal')closeAuthModal()});document.getElementById('googleLoginBtn')?.addEventListener('click',googleLogin);document.getElementById('emailLoginBtn')?.addEventListener('click',emailLogin);document.getElementById('signupBtn')?.addEventListener('click',emailSignup);document.getElementById('resetBtn')?.addEventListener('click',resetPassword)}async function initAuth(){if(!sb){setAuthUI('Supabase не завантажився');return}const {data:{session}}=await sb.auth.getSession();cloudUser=session?.user||null;if(cloudUser){setAuthUI(cloudUser.email||'Google','ok');try{await loadAndMergeCloud()}catch(e){console.error(e);setAuthUI('Помилка синхронізації')}}else{cloudReady=false;setAuthUI('Локально')}sb.auth.onAuthStateChange((event,session)=>{const prev=cloudUser?.id;cloudUser=session?.user||null;if(cloudUser&&cloudUser.id!==prev)setTimeout(()=>loadAndMergeCloud().catch(e=>{console.error(e);setAuthUI('Помилка синхронізації')}),0);if(!cloudUser){cloudReady=false;setAuthUI('Локально')}});document.getElementById('authBtn')?.addEventListener('click',async()=>{if(cloudUser){await sb.auth.signOut();return}openAuthModal();});
   document.getElementById('lcCalculate')?.addEventListener('click',calcLotSize);
   document.getElementById('lcReset')?.addEventListener('click',()=>{
     document.getElementById('lcPair').value='EURUSD';
@@ -1604,4 +1565,4 @@ function setupLotCalculator(){
 }
 setupLotCalculator();
 
-</script></body></html>
+</script><div id="authModal" class="auth-modal" aria-hidden="true"><div class="auth-card"><button id="authClose" class="auth-close" type="button">×</button><h2>Увійти в журнал</h2><button id="googleLoginBtn" class="auth-google" type="button">Продовжити через Google</button><div class="auth-sep">або</div><label class="auth-field"><span>Email</span><input id="authEmail" type="email" autocomplete="email" placeholder="you@example.com"></label><label class="auth-field"><span>Пароль</span><input id="authPassword" type="password" autocomplete="current-password" placeholder="Мінімум 6 символів"></label><button id="emailLoginBtn" class="auth-primary" type="button">Увійти</button><div class="auth-links"><button id="signupBtn" class="auth-link" type="button">Створити акаунт</button><button id="resetBtn" class="auth-link" type="button">Забув пароль?</button></div><div id="authMsg" class="auth-msg"></div></div></div></body></html>
