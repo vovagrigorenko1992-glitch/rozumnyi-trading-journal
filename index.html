@@ -1678,6 +1678,46 @@ async function handleAuthButton(){
   openAuthModal();
 }
 
+
+function calcLotSize(){
+  const pair=document.getElementById('lcPair')?.value||'EURUSD';
+  const balance=parseFloat(document.getElementById('lcBalance')?.value);
+  const riskPct=parseFloat(document.getElementById('lcRisk')?.value);
+  const stop=parseFloat(String(document.getElementById('lcStop')?.value||'').replace(',','.'));
+  const price=parseFloat(String(document.getElementById('lcPrice')?.value||'').replace(',','.'));
+  const priceWrap=document.getElementById('lcPriceWrap');
+  const note=document.getElementById('lcNote');
+
+  const needsPrice=['USDJPY','USDCHF','USDCAD'].includes(pair);
+  if(priceWrap) priceWrap.style.opacity=needsPrice?'1':'.65';
+  if(note) note.textContent=needsPrice
+    ? `Для ${pair} введи поточну ціну, щоб правильно порахувати вартість pip.`
+    : 'Для EURUSD та інших пар із USD справа ціна не потрібна.';
+
+  if(!(balance>0) || !(riskPct>0) || !(stop>0) || (needsPrice && !(price>0))){
+    document.getElementById('lcLots').innerHTML='— <small>lot</small>';
+    document.getElementById('lcMoney').textContent=Number.isFinite(balance)&&Number.isFinite(riskPct)?'$'+(balance*riskPct/100).toFixed(2):'—';
+    document.getElementById('lcPipValue').textContent='—';
+    document.getElementById('lcStopOut').textContent=Number.isFinite(stop)?stop+' pips':'—';
+    document.getElementById('lcRiskOut').textContent=Number.isFinite(riskPct)?riskPct.toFixed(2)+'%':'—';
+    return;
+  }
+
+  const riskMoney=balance*riskPct/100;
+  let pipPerLot=10;
+  if(pair==='USDJPY') pipPerLot=1000/price;
+  else if(pair==='USDCHF'||pair==='USDCAD') pipPerLot=10/price;
+
+  const lots=riskMoney/(stop*pipPerLot);
+  const pipValue=lots*pipPerLot;
+
+  document.getElementById('lcLots').innerHTML=lots.toFixed(2)+' <small>lot</small>';
+  document.getElementById('lcMoney').textContent='$'+riskMoney.toFixed(2);
+  document.getElementById('lcPipValue').textContent='$'+pipValue.toFixed(2);
+  document.getElementById('lcStopOut').textContent=stop+' pips';
+  document.getElementById('lcRiskOut').textContent=riskPct.toFixed(2)+'%';
+}
+
 async function initAuth(){
   const authBtn=document.getElementById('authBtn');
 
@@ -1709,6 +1749,12 @@ async function initAuth(){
     cloudUser=null;cloudReady=false;trades=[];setAuthUI('Локально');render();loadInstruments();loadEntryModels();
   }
 
+  ['lcPair','lcBalance','lcRisk','lcStop','lcPrice'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(!el)return;
+    el.addEventListener('input',calcLotSize);
+    el.addEventListener('change',calcLotSize);
+  });
   document.getElementById('lcCalculate')?.addEventListener('click',calcLotSize);
   document.getElementById('lcReset')?.addEventListener('click',()=>{
     document.getElementById('lcPair').value='EURUSD';
