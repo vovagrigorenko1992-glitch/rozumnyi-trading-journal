@@ -889,7 +889,7 @@ header .tabs button{padding:10px 14px!important}
     <i class="up"></i><i class="down"></i><i class="up"></i>
   </div>
 </div>
-<header><div class='wrap top'><div class='brand-lockup'><div class='brand'>Розумний трейдинг-журнал</div><div class='brand-tagline'><span class='mini-candles'><i></i><i></i><i></i></span><b>Трейдинг</b><span>|</span><em>Не кнопка бабло</em></div></div><div class='auth-box'><img id='authAvatar' class='auth-avatar' alt='Аватар'><span id='authAvatarFallback' class='auth-avatar-fallback' aria-label='Аватар'>👤</span><span id='authStatus' class='auth-status'><i class='sync-dot'></i>Локально</span><button id='authBtn' class='auth-btn' type='button'>Увійти</button></div><nav class='tabs'><button data-tab='dash' class='active'>Дашборд</button><button data-tab='journal'>Журнал</button><button data-tab='add'>+ Нова угода</button><button data-tab='analytics'>Аналітика</button><button data-tab='calculator'>Калькулятор</button><button data-tab='settings'>Налаштування</button></nav></div></header><main>
+<header><div class='wrap top'><div class='brand-lockup'><div class='brand'>Розумний трейдинг-журнал</div><div class='brand-tagline'><span class='mini-candles'><i></i><i></i><i></i></span><b>Трейдинг</b><span>|</span><em>Не кнопка бабло</em></div></div><div class='auth-box'><img id='authAvatar' class='auth-avatar' alt='Аватар'><span id='authAvatarFallback' class='auth-avatar-fallback' aria-label='Аватар'>👤</span><span id='authStatus' class='auth-status'><i class='sync-dot'></i>Локально</span><button id='authBtn' class='auth-btn' type='button' onclick='handleAuthButton()'>Увійти</button></div><nav class='tabs'><button data-tab='dash' class='active'>Дашборд</button><button data-tab='journal'>Журнал</button><button data-tab='add'>+ Нова угода</button><button data-tab='analytics'>Аналітика</button><button data-tab='calculator'>Калькулятор</button><button data-tab='settings'>Налаштування</button></nav></div></header><main>
 <section id='dash' class='active'><h2>Дашборд</h2><div id='metrics' class='grid'></div><div class='dashboard-main'>
   <div class='dashboard-calendar-col'>
     <div class='mini-calendar-slot'><div class='card news-calendar'>
@@ -1654,20 +1654,20 @@ async function clearCurrentAccountCloud(){
   localStorage.setItem(userStorageKey(cloudUser.id),'[]');
   render();loadInstruments();loadEntryModels();
 }
+
+async function handleAuthButton(){
+  if(cloudUser){
+    try{await sb?.auth.signOut()}catch(e){console.error(e)}
+    cloudUser=null;cloudReady=false;setAuthUI('Локально');
+    try{trades=JSON.parse(localStorage.getItem('tjv62')||'[]')}catch(e){trades=[]}
+    render();loadInstruments();loadEntryModels();
+    return;
+  }
+  openAuthModal();
+}
+
 async function initAuth(){
   const authBtn=document.getElementById('authBtn');
-
-  // Bind immediately, so the button never becomes dead while session/cloud data is loading.
-  authBtn?.addEventListener('click',async()=>{
-    if(cloudUser){
-      try{await sb.auth.signOut()}catch(e){console.error(e)}
-      cloudUser=null;cloudReady=false;setAuthUI('Локально');
-      try{trades=JSON.parse(localStorage.getItem('tjv62')||'[]')}catch(e){trades=[]}
-      render();loadInstruments();loadEntryModels();
-      return;
-    }
-    openAuthModal();
-  });
 
   if(!sb){setAuthUI('Supabase не завантажився');return}
 
@@ -1708,6 +1708,5 @@ async function initAuth(){
   });
   calcLotSize();
 }
-setupLotCalculator();
 
-</script><div id="authModal" class="auth-modal" aria-hidden="true"><div class="auth-card"><button id="authClose" class="auth-close" type="button">×</button><h2>Увійти в журнал</h2><button id="googleLoginBtn" class="auth-google" type="button">Продовжити через Google</button><div class="auth-sep">або</div><label class="auth-field"><span>Email</span><input id="authEmail" type="email" autocomplete="email" placeholder="you@example.com"></label><label class="auth-field"><span>Пароль</span><input id="authPassword" type="password" autocomplete="current-password" placeholder="Мінімум 6 символів"></label><button id="emailLoginBtn" class="auth-primary" type="button">Увійти</button><div class="auth-links"><button id="signupBtn" class="auth-link" type="button">Створити акаунт</button><button id="resetBtn" class="auth-link" type="button">Забув пароль?</button></div><div id="authMsg" class="auth-msg"></div></div></div><script>bindAuthModal();initAuth();</script></body></html>
+</script><div id="authModal" class="auth-modal" aria-hidden="true"><div class="auth-card"><button id="authClose" class="auth-close" type="button" onclick="closeAuthModal()">×</button><h2>Увійти в журнал</h2><button id="googleLoginBtn" class="auth-google" type="button" onclick="googleLogin()">Продовжити через Google</button><div class="auth-sep">або</div><label class="auth-field"><span>Email</span><input id="authEmail" type="email" autocomplete="email" placeholder="you@example.com"></label><label class="auth-field"><span>Пароль</span><input id="authPassword" type="password" autocomplete="current-password" placeholder="Мінімум 6 символів"></label><button id="emailLoginBtn" class="auth-primary" type="button" onclick="emailLogin()">Увійти</button><div class="auth-links"><button id="signupBtn" class="auth-link" type="button" onclick="emailSignup()">Створити акаунт</button><button id="resetBtn" class="auth-link" type="button" onclick="resetPassword()">Забув пароль?</button></div><div id="authMsg" class="auth-msg"></div></div></div><script>bindAuthModal();initAuth();</script></body></html>
