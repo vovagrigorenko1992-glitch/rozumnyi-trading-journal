@@ -1548,14 +1548,15 @@ pendingShotGroups={before:[emptyShot('H1')],after:[emptyShot('M5')]};renderShotG
 $('#saved').textContent='Збережено ✓';setTimeout(()=>$('#saved').textContent='',1500)};
 $('#export').onclick=()=>{let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(trades,null,2)],{type:'application/json'}));a.download='trading-journal-backup.json';a.click()};$('#reset').onclick=()=>{localStorage.removeItem('tjv62');location.reload()};
 $('#csv').onchange=e=>{let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{alert('CSV import parser will be upgraded in v1.1. Your bundled journal is already preloaded in this build.')};r.readAsText(f)};
+var cloudUser=null,cloudTimer=null,cloudBusy=false,cloudReady=false,sb=null;
 init();setTodayDate();loadInstruments();loadEntryModels();initCalendarUI();
 // Cloud sync: Supabase + Google OAuth
 const SUPABASE_URL='https://qqshpilcwesnopdchwbn.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY='sb_publishable_ZpvRoNF1dmomlyNYLTN_9g_KoJ1rYlS';
-const sb=window.supabase?.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{
+sb=window.supabase?.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{
   auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storage:window.localStorage}
 });
-let cloudUser=null,cloudTimer=null,cloudBusy=false,cloudReady=false;
+
 function setAuthUI(text,state=''){const s=document.getElementById('authStatus'),b=document.getElementById('authBtn');if(s)s.innerHTML='<i class="sync-dot '+state+'"></i>'+esc(text);if(b){b.textContent=cloudUser?'Вийти':'Увійти';b.classList.toggle('signed',!!cloudUser)}
   const box=b?.closest('.auth-box'),avatar=document.getElementById('authAvatar');
   if(box)box.classList.toggle('has-user',!!cloudUser);
@@ -1655,6 +1656,15 @@ async function clearCurrentAccountCloud(){
   render();loadInstruments();loadEntryModels();
 }
 
+function openAuthModal(){const m=document.getElementById('authModal');if(!m)return;m.classList.add('open')}
+function closeAuthModal(){document.getElementById('authModal')?.classList.remove('open');authMessage('')}
+function authMessage(msg,type=''){const e=document.getElementById('authMsg');if(e){e.textContent=msg||'';e.className='auth-msg'+(type?' '+type:'')}}
+function authCredentials(){return{email:(document.getElementById('authEmail')?.value||'').trim(),password:document.getElementById('authPassword')?.value||''}}
+async function googleLogin(){const{error}=await sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:window.location.origin+window.location.pathname}});if(error)authMessage(error.message,'err')}
+async function emailLogin(){const{email,password}=authCredentials();if(!email||!password)return authMessage('Введи email і пароль.','err');const{error}=await sb.auth.signInWithPassword({email,password});if(error)return authMessage(error.message,'err');closeAuthModal()}
+async function emailSignup(){const{email,password}=authCredentials();if(!email||!password)return authMessage('Введи email і пароль.','err');if(password.length<6)return authMessage('Пароль має містити щонайменше 6 символів.','err');const{data,error}=await sb.auth.signUp({email,password,options:{emailRedirectTo:window.location.origin+window.location.pathname}});if(error)return authMessage(error.message,'err');authMessage(data?.session?'Акаунт створено. Вхід виконано.':'Готово. Перевір пошту та підтвердь реєстрацію.','ok')}
+async function resetPassword(){const email=(document.getElementById('authEmail')?.value||'').trim();if(!email)return authMessage('Спочатку введи email.','err');const{error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin+window.location.pathname});authMessage(error?error.message:'Лист для відновлення пароля надіслано.',error?'err':'ok')}
+function bindAuthModal(){document.getElementById('authClose')?.addEventListener('click',closeAuthModal);document.getElementById('authModal')?.addEventListener('click',e=>{if(e.target?.id==='authModal')closeAuthModal()});document.getElementById('googleLoginBtn')?.addEventListener('click',googleLogin);document.getElementById('emailLoginBtn')?.addEventListener('click',emailLogin);document.getElementById('signupBtn')?.addEventListener('click',emailSignup);document.getElementById('resetBtn')?.addEventListener('click',resetPassword)}
 async function handleAuthButton(){
   if(cloudUser){
     try{await sb?.auth.signOut()}catch(e){console.error(e)}
