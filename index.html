@@ -865,6 +865,10 @@ header .tabs button{padding:10px 14px!important}
 
 /* Compact logged-out auth: hide local status text */
 .auth-box:not(:has(.auth-btn.signed)) .auth-status{display:none}
+
+.auth-avatar{width:38px;height:38px;border-radius:50%;object-fit:cover;border:2px solid #2ecc71;background:#172638;display:none}
+.auth-box.has-user .auth-avatar{display:block}
+.auth-box.has-user .auth-status{display:none!important}
 </style><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script></head><body>
 <div class="market-art-bg" aria-hidden="true">
   <div class="market-chart-line"></div>
@@ -881,7 +885,7 @@ header .tabs button{padding:10px 14px!important}
     <i class="up"></i><i class="down"></i><i class="up"></i>
   </div>
 </div>
-<header><div class='wrap top'><div class='brand-lockup'><div class='brand'>Розумний трейдинг-журнал</div><div class='brand-tagline'><span class='mini-candles'><i></i><i></i><i></i></span><b>Трейдинг</b><span>|</span><em>Не кнопка бабло</em></div></div><div class='auth-box'><span id='authStatus' class='auth-status'><i class='sync-dot'></i>Локально</span><button id='authBtn' class='auth-btn' type='button'>Увійти</button></div><nav class='tabs'><button data-tab='dash' class='active'>Дашборд</button><button data-tab='journal'>Журнал</button><button data-tab='add'>+ Нова угода</button><button data-tab='analytics'>Аналітика</button><button data-tab='calculator'>Калькулятор</button><button data-tab='settings'>Налаштування</button></nav></div></header><main>
+<header><div class='wrap top'><div class='brand-lockup'><div class='brand'>Розумний трейдинг-журнал</div><div class='brand-tagline'><span class='mini-candles'><i></i><i></i><i></i></span><b>Трейдинг</b><span>|</span><em>Не кнопка бабло</em></div></div><div class='auth-box'><img id='authAvatar' class='auth-avatar' alt='Аватар'><span id='authStatus' class='auth-status'><i class='sync-dot'></i>Локально</span><button id='authBtn' class='auth-btn' type='button'>Увійти</button></div><nav class='tabs'><button data-tab='dash' class='active'>Дашборд</button><button data-tab='journal'>Журнал</button><button data-tab='add'>+ Нова угода</button><button data-tab='analytics'>Аналітика</button><button data-tab='calculator'>Калькулятор</button><button data-tab='settings'>Налаштування</button></nav></div></header><main>
 <section id='dash' class='active'><h2>Дашборд</h2><div id='metrics' class='grid'></div><div class='dashboard-main'>
   <div class='dashboard-calendar-col'>
     <div class='mini-calendar-slot'><div class='card news-calendar'>
@@ -1546,7 +1550,13 @@ const SUPABASE_URL='https://qqshpilcwesnopdchwbn.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY='sb_publishable_ZpvRoNF1dmomlyNYLTN_9g_KoJ1rYlS';
 const sb=window.supabase?.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
 let cloudUser=null,cloudTimer=null,cloudBusy=false,cloudReady=false;
-function setAuthUI(text,state=''){const s=document.getElementById('authStatus'),b=document.getElementById('authBtn');if(s)s.innerHTML='<i class="sync-dot '+state+'"></i>'+esc(text);if(b){b.textContent=cloudUser?'Вийти':'Увійти';b.classList.toggle('signed',!!cloudUser)}}
+function setAuthUI(text,state=''){const s=document.getElementById('authStatus'),b=document.getElementById('authBtn');if(s)s.innerHTML='<i class="sync-dot '+state+'"></i>'+esc(text);if(b){b.textContent=cloudUser?'Вийти':'Увійти';b.classList.toggle('signed',!!cloudUser)}
+  const box=b?.closest('.auth-box'),avatar=document.getElementById('authAvatar');
+  if(box)box.classList.toggle('has-user',!!cloudUser);
+  if(avatar&&cloudUser){
+    const pic=cloudUser.user_metadata?.avatar_url||cloudUser.user_metadata?.picture||'';
+    if(pic){avatar.src=pic;avatar.style.display='block'}else{avatar.removeAttribute('src');avatar.style.display='none'}
+  }else if(avatar){avatar.removeAttribute('src');avatar.style.display='none'}}
 function tradeKey(t){const id=String(t?.id||'').trim();if(id)return id;return [t?.date,t?.pair,t?.session,t?.side,t?.model,t?.r].map(x=>String(x??'')).join('|')}
 function scheduleCloudSync(){if(!cloudReady||!cloudUser||!sb)return;clearTimeout(cloudTimer);cloudTimer=setTimeout(()=>syncToCloud().catch(e=>{console.error(e);setAuthUI('Помилка синхронізації')}),900)}
 async function syncToCloud(){if(!cloudReady||!cloudUser||!sb||cloudBusy)return;cloudBusy=true;setAuthUI('Синхронізація…','busy');try{const {data:rows,error:readErr}=await sb.from('trades').select('id,trade_data').eq('user_id',cloudUser.id);if(readErr)throw readErr;const existing=new Map((rows||[]).map(r=>[tradeKey(r.trade_data),r]));const localKeys=new Set(trades.map(tradeKey));const toDelete=(rows||[]).filter(r=>!localKeys.has(tradeKey(r.trade_data))).map(r=>r.id);if(toDelete.length){const {error}=await sb.from('trades').delete().in('id',toDelete).eq('user_id',cloudUser.id);if(error)throw error}for(const t of trades){const old=existing.get(tradeKey(t));if(old){const {error}=await sb.from('trades').update({trade_data:t,updated_at:new Date().toISOString()}).eq('id',old.id).eq('user_id',cloudUser.id);if(error)throw error}else{const {error}=await sb.from('trades').insert({user_id:cloudUser.id,trade_data:t});if(error)throw error}}setAuthUI(cloudUser.email||'Синхронізовано','ok')}finally{cloudBusy=false}}
