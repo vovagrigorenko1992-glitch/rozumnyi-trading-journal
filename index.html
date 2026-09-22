@@ -1073,7 +1073,7 @@ function renderMiniCurve(selector,data,unit){
   let pct=v=>(v-min)/range*100;
   let grid=ticks.map(v=>`<div class='chart-grid-line' style='bottom:${pct(v)}%'></div>`).join('');
   let labels=ticks.map(v=>`<span style='bottom:${pct(v)}%'>${v>0?'+':''}${unit==='R'?v.toFixed(v%1?1:0):v.toFixed(2)}${unit}</span>`).join('');
-  let bars=data.map((v,i)=>`<div class='chart-col'><div class='chart-bar' title='Угода ${i+1}: ${v>=0?'+':''}${unit==='R'?v.toFixed(1):v.toFixed(2)}${unit}' style='height:${Math.max(2,pct(v))}%'></div></div>`).join('');
+  let bars=data.map((v,i)=>{let incomeColor=unit==='%'?(v>0?'background:linear-gradient(180deg,#5bd69a 0%,#16a56a 65%,#0f7f50 100%);box-shadow:0 4px 14px rgba(44,190,120,.18);':v<0?'background:linear-gradient(180deg,#ff7774 0%,#ef5350 65%,#b93634 100%);box-shadow:0 4px 14px rgba(239,83,80,.18);':''):'';return `<div class='chart-col'><div class='chart-bar' title='Угода ${i+1}: ${v>=0?'+':''}${unit==='R'?v.toFixed(1):v.toFixed(2)}${unit}' style='height:${Math.max(2,pct(v))}%;${incomeColor}'></div></div>`}).join('');
   el.innerHTML=`<div class='chart-grid'>${grid}</div><div class='chart-y'>${labels}</div><div class='chart-bars'>${bars}</div><div class='chart-xlabel'>угоди →</div>`;
 }
 renderMiniCurve('#equity',series,'R');
