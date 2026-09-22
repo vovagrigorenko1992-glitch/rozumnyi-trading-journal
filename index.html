@@ -1064,13 +1064,13 @@ function parseSeedRow(x){let rr=parseFloat(String(x['RR']).replace(',','.'))||0;
 async function init(){trades=[];render()}
 function setTodayDate(){let el=document.querySelector("#tradeForm input[name='date']");if(!el)return;let d=new Date(),y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');if(!el.value)el.value=`${y}-${m}-${day}`;if(el.showPicker)el.addEventListener('click',()=>{try{el.showPicker()}catch(e){}})}
 function save(){if(!cloudUser)return;localStorage.setItem(userStorageKey(cloudUser.id),JSON.stringify(trades));scheduleCloudSync()}
-function stats(arr=trades){let done=arr.filter(t=>['TP','SL','BE'].includes(t.result));let wins=done.filter(t=>+t.r>0);let losses=done.filter(t=>+t.r<0);let sum=done.reduce((a,t)=>a+(+t.r||0),0);let income=done.reduce((a,t)=>a+((+t.r||0)*(+t.risk||0)),0);let wr=done.length?wins.length/done.length*100:0;let gp=wins.reduce((a,t)=>a+(+t.r||0),0),gl=Math.abs(losses.reduce((a,t)=>a+(+t.r||0),0));return{n:done.length,w:wins.length,l:losses.length,sum,income,wr,pf:gl?gp/gl:0,exp:done.length?sum/done.length:0}}
-function render(){let s=stats();let vals=[['Угоди',s.n],['Winrate',s.wr.toFixed(1)+'%'],['Сумарний R',(s.sum>=0?'+':'')+s.sum.toFixed(1)+'R'],['Середній R',s.exp.toFixed(2)+'R'],['Дохід',(s.income>=0?'+':'')+s.income.toFixed(2)+'%']];
+function stats(arr=trades){let done=arr.filter(t=>['TP','SL','BE'].includes(t.result));let wins=done.filter(t=>+t.r>0);let losses=done.filter(t=>+t.r<0);let sum=done.reduce((a,t)=>a+(+t.r||0),0);let income=done.reduce((a,t)=>a+((+t.r||0)*(+t.risk||0)),0);let wr=done.length?wins.length/done.length*100:0;let gp=wins.reduce((a,t)=>a+(+t.r||0),0),gl=Math.abs(losses.reduce((a,t)=>a+(+t.r||0),0));return{n:done.length,w:wins.length,l:losses.length,sum,income,wr,pf:gl?gp/gl:0,exp:done.length?sum/done.length:0,avgWinRR:wins.length?gp/wins.length:0}}
+function render(){let s=stats();let vals=[['Угоди',s.n],['Winrate',s.wr.toFixed(1)+'%'],['Сумарний R',(s.sum>=0?'+':'')+s.sum.toFixed(1)+'R'],['Середній RR',s.avgWinRR.toFixed(2)+'R'],['Дохід',(s.income>=0?'+':'')+s.income.toFixed(2)+'%']];
 let metricInfo={
 'Угоди':['Кількість завершених угод, які входять у статистику: TP, SL та BE.','N = TP + SL + BE'],
 'Winrate':['Відсоток прибуткових угод серед усіх завершених угод.','WR = прибуткові / усі × 100%'],
 'Сумарний R':['Загальний результат усіх завершених угод у R.','Σ R усіх угод'],
-'Середній R':['Середній результат однієї завершеної угоди.','Сер. R = Сумарний R / N'],
+'Середній RR':['Середній RR лише прибуткових угод. Збиткові та BE тут не враховуються.','Сер. RR = Σ R прибуткових / кількість прибуткових'],
 'Дохід':['Сумарний результат у % з урахуванням ризику кожної угоди.','Дохід = Σ (R × ризик %)']
 };
 $('#metrics').innerHTML=vals.map((v,i)=>`<div class='card metric'><span class='muted'>${v[0]}</span><b>${v[1]}</b><button type='button' class='metric-help' data-mi='${i}'>?</button><div class='metric-popover' data-mp='${i}'><b>${v[0]}</b>${metricInfo[v[0]][0]}<span class='formula'>${metricInfo[v[0]][1]}</span></div></div>`).join('');
