@@ -115,6 +115,17 @@
 .equity-with-calendar{display:grid!important;grid-template-columns:300px minmax(0,1fr)!important;gap:12px!important;padding:0!important;background:transparent!important;border:0!important;height:300px!important}
 .equity-chart-card{min-width:0;height:300px!important;box-sizing:border-box;overflow:hidden}
 .equity-chart-card .chart{height:210px!important;margin-top:8px!important;padding-top:4px!important}
+.equity-chart-card{display:flex;flex-direction:column;gap:0;padding:14px 16px!important}
+.equity-mini{min-height:0;flex:1;display:flex;flex-direction:column}
+.equity-mini+.equity-mini{border-top:1px solid var(--line);padding-top:8px;margin-top:5px}
+.equity-mini-title{font-weight:700;font-size:14px;line-height:18px}
+.equity-chart-card .mini-chart{height:104px!important;margin-top:2px!important;padding:2px 8px 18px 42px!important}
+.equity-chart-card .mini-chart .chart-grid{left:42px;top:2px;bottom:18px}
+.equity-chart-card .mini-chart .chart-y{top:2px;bottom:18px;width:36px;font-size:9px}
+.equity-chart-card .mini-chart .chart-y span{right:5px}
+.equity-chart-card .mini-chart .chart-bars{left:42px;top:2px;bottom:18px;gap:4px}
+.equity-chart-card .mini-chart .chart-zero{left:42px;right:8px}
+.equity-chart-card .mini-chart .chart-xlabel{bottom:0;font-size:9px}
 .mini-calendar-slot{min-width:0;height:300px}
 .mini-calendar-slot .news-calendar{margin:0!important;height:300px!important;box-sizing:border-box}
 .mini-calendar-slot .news-cal-head{padding:11px 12px!important;display:block!important}
@@ -944,7 +955,7 @@ body.trade-editing #add h2::after{content:' · редагування';color:var
 </div></div>
   </div>
   <div class='dashboard-content-col'>
-    <div class='card equity-chart-card'><b>Крива результату, R</b><div id='equity' class='chart'></div></div>
+    <div class='card equity-chart-card'><div class='equity-mini'><div class='equity-mini-title'>Крива результату, R</div><div id='equity' class='chart mini-chart'></div></div><div class='equity-mini'><div class='equity-mini-title'>Крива дохідності, %</div><div id='incomeCurve' class='chart mini-chart'></div></div></div>
     <div class='card advice-card'><div class='advice-head'><b>Топ-3 поради для тебе!</b><span class='advice-sub'>На основі статистики журналу</span></div><div id='traderAdvice' class='advice-list'></div></div>
   </div>
   <div class='card distribution-card'><b>Розподіл</b><div id='breakdown' style='margin-top:14px'></div></div>
@@ -1064,7 +1075,23 @@ let metricInfo={
 };
 $('#metrics').innerHTML=vals.map((v,i)=>`<div class='card metric'><span class='muted'>${v[0]}</span><b>${v[1]}</b><button type='button' class='metric-help' data-mi='${i}'>?</button><div class='metric-popover' data-mp='${i}'><b>${v[0]}</b>${metricInfo[v[0]][0]}<span class='formula'>${metricInfo[v[0]][1]}</span></div></div>`).join('');
 $$('.metric-help').forEach(btn=>btn.onclick=e=>{e.stopPropagation();let pop=$(`.metric-popover[data-mp="${btn.dataset.mi}"]`),open=pop.classList.contains('open');$$('.metric-popover').forEach(x=>x.classList.remove('open'));if(!open)pop.classList.add('open')});
-let eq=0, series=trades.filter(t=>['TP','SL','BE'].includes(t.result)).map(t=>eq+=(+t.r||0));let rawMin=Math.min(0,...series),rawMax=Math.max(1,...series);let step=Math.max(1,Math.ceil((rawMax-rawMin)/5));let min=Math.floor(rawMin/step)*step,max=Math.ceil(rawMax/step)*step;if(max===min)max=min+step;let range=max-min;let ticks=[];for(let v=min;v<=max+.0001;v+=step)ticks.push(v);let pct=v=>(v-min)/range*100;let grid=ticks.map(v=>`<div class='chart-grid-line' style='bottom:${pct(v)}%'></div>`).join('');let labels=ticks.map(v=>`<span style='bottom:${pct(v)}%'>${v>0?'+':''}${v}R</span>`).join('');let bars=series.map((v,i)=>`<div class='chart-col'><div class='chart-bar' title='Угода ${i+1}: ${v>=0?'+':''}${v.toFixed(1)}R' style='height:${Math.max(2,pct(v))}%'></div></div>`).join('');$('#equity').innerHTML=`<div class='chart-grid'>${grid}</div><div class='chart-y'>${labels}</div>${min<0&&max>0?`<div class='chart-zero' style='bottom:calc(26px + ${(0-min)/range*176}px)'></div>`:''}<div class='chart-bars'>${bars}</div><div class='chart-xlabel'>угоди →</div>`;
+let doneTrades=trades.filter(t=>['TP','SL','BE'].includes(t.result));
+let eq=0, series=doneTrades.map(t=>eq+=(+t.r||0));
+let inc=0, incomeSeries=doneTrades.map(t=>inc+=((+t.r||0)*(+t.risk||0)));
+function renderMiniCurve(selector,data,unit){
+  let el=$(selector);if(!el)return;
+  let rawMin=Math.min(0,...data),rawMax=Math.max(unit==='R'?1:.25,...data),span=rawMax-rawMin;
+  let rough=span/4, step=unit==='R'?Math.max(1,Math.ceil(rough)):Math.max(.25,Math.ceil(rough*4)/4);
+  let min=Math.floor(rawMin/step)*step,max=Math.ceil(rawMax/step)*step;if(max===min)max=min+step;
+  let range=max-min,ticks=[];for(let v=min;v<=max+step*.01;v+=step)ticks.push(+v.toFixed(4));
+  let pct=v=>(v-min)/range*100;
+  let grid=ticks.map(v=>`<div class='chart-grid-line' style='bottom:${pct(v)}%'></div>`).join('');
+  let labels=ticks.map(v=>`<span style='bottom:${pct(v)}%'>${v>0?'+':''}${unit==='R'?v.toFixed(v%1?1:0):v.toFixed(2)}${unit}</span>`).join('');
+  let bars=data.map((v,i)=>{let incomeColor=unit==='%'?(v>0?'background:linear-gradient(180deg,#5bd69a 0%,#16a56a 65%,#0f7f50 100%);box-shadow:0 4px 14px rgba(44,190,120,.18);':v<0?'background:linear-gradient(180deg,#ff7774 0%,#ef5350 65%,#b93634 100%);box-shadow:0 4px 14px rgba(239,83,80,.18);':''):'';return `<div class='chart-col'><div class='chart-bar' title='Угода ${i+1}: ${v>=0?'+':''}${unit==='R'?v.toFixed(1):v.toFixed(2)}${unit}' style='height:${Math.max(2,pct(v))}%;${incomeColor}'></div></div>`}).join('');
+  el.innerHTML=`<div class='chart-grid'>${grid}</div><div class='chart-y'>${labels}</div><div class='chart-bars'>${bars}</div><div class='chart-xlabel'>угоди →</div>`;
+}
+renderMiniCurve('#equity',series,'R');
+renderMiniCurve('#incomeCurve',incomeSeries,'%');
 $('#breakdown').innerHTML=groupHTML('Сесія','session')+groupHTML('Напрямок','side')+groupHTML('Тип входу','entryType'); renderAdvice(); renderRows(); renderАналітика(); fillSessions()}
 function group(key){let m={};trades.forEach(t=>{if(key==='entryType'&&!t[key])return;let k=t[key]||'Unknown';(m[k]??=[]).push(t)});return m}function groupHTML(title,key){let g=group(key),mx=Math.max(1,...Object.values(g).map(a=>a.length));let tones=key==='session'?{'New-York':'tone-blue','London':'tone-violet','Asia':'tone-orange'}:key==='entryType'?{'Market':'tone-green','Limit':'tone-violet'}:{'Long':'tone-green','Short':'tone-orange'};return `<div class='break-section'><div class='break-title'>${title}</div>${Object.entries(g).map(([k,a])=>{let s=stats(a),cls=s.sum>=0?'good':'bad',tone=tones[k]||'tone-blue';return `<div class='break-item'><div class='break-top'><span class='break-name'>${k}</span><span class='break-stats'><span class='stat-chip'>${a.length} угод</span><span class='stat-chip'>${s.wr.toFixed(0)}% WR</span><span class='stat-chip ${cls}'>${s.sum>=0?'+':''}${s.sum.toFixed(1)}R</span></span></div><div class='break-bar ${tone}'><i style='width:${a.length/mx*100}%'></i></div></div>`}).join('')}</div>`}
 function parseTradeDate(v){if(!v)return null;let x=String(v).trim().split(/[ ,T]/)[0];if(/^\d{4}-\d{2}-\d{2}$/.test(x)){let [y,m,d]=x.split('-').map(Number);return new Date(y,m-1,d)}if(/^\d{2}\/\d{2}\/\d{4}$/.test(x)){let [d,m,y]=x.split('/').map(Number);return new Date(y,m-1,d)}return null}
