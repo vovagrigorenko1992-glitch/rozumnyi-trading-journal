@@ -919,6 +919,17 @@ body.trade-editing #add h2::after{content:' · редагування';color:var
 
 /* vNext: 100 fully documented trades challenge */
 .challenge-card{margin-top:14px;padding:15px 18px!important;display:grid;gap:9px}.challenge-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-end}.challenge-title{font-weight:800;font-size:14px}.challenge-sub{font-size:11px;color:var(--muted);margin-top:3px}.challenge-count{font-weight:900;font-size:18px;white-space:nowrap}.challenge-track,.completion-track{height:9px;border-radius:999px;background:#171e28;border:1px solid #263140;overflow:hidden}.challenge-track i,.completion-track i{display:block;height:100%;width:0;border-radius:inherit;background:linear-gradient(90deg,#1d8f63,#55d6a2);transition:width .2s ease}.challenge-foot{display:flex;justify-content:space-between;gap:12px;color:var(--muted);font-size:11px}.completion-box{grid-column:1/-1;border:1px solid #273241;background:#0e141c;border-radius:12px;padding:12px 14px;display:grid;gap:8px}.completion-head{display:flex;align-items:center;justify-content:space-between;gap:12px}.completion-head b{font-size:13px}.completion-percent{font-size:18px;font-weight:900}.completion-missing{font-size:11px;color:var(--muted);line-height:1.45}.completion-percent.complete{color:#55d6a2}.ai-lock{max-width:780px;margin:28px auto;text-align:center;padding:34px!important}.ai-lock-icon{font-size:34px;margin-bottom:10px}.ai-progress-num{font-size:30px;font-weight:900;margin:18px 0 10px}.ai-ready{max-width:980px;margin:0 auto}.ai-ready-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px}.ai-ready .card{padding:16px}.ai-ready h3{margin:0 0 7px}.ai-note{margin-top:14px;padding:14px;border:1px solid #314052;border-radius:12px;background:#0d141d;color:var(--muted);font-size:12px;line-height:1.5}.tabs .ai-tab.locked{opacity:.7}.tabs .ai-tab.unlocked{border-color:rgba(85,214,162,.35)!important;color:#a9f0d2!important}@media(max-width:760px){.challenge-head{align-items:flex-start}.challenge-foot{flex-direction:column}.ai-ready-grid{grid-template-columns:1fr}}
+
+/* Header title — Variant 3: light/regular, using the positive income-curve green */
+.brand-lockup .brand{
+  font-weight:400!important;
+  letter-spacing:-.025em!important;
+  color:#f4f8fd!important;
+  text-shadow:none!important;
+}
+.brand-lockup .brand .brand-smart{color:#5bd69a!important;font-weight:400!important}
+.brand-lockup .brand .brand-rest{color:#f4f8fd!important;font-weight:400!important}
+
 </style><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script></head><body>
 <div class="market-art-bg" aria-hidden="true">
   <div class="market-chart-line"></div>
@@ -935,7 +946,7 @@ body.trade-editing #add h2::after{content:' · редагування';color:var
     <i class="up"></i><i class="down"></i><i class="up"></i>
   </div>
 </div>
-<header><div class='wrap top'><div class='brand-lockup'><div class='brand'>Розумний трейдинг-журнал</div><div class='brand-tagline'><span class='mini-candles'><i></i><i></i><i></i></span><b>Трейдинг</b><span>|</span><em>Не кнопка бабло</em></div></div><div class='auth-box'><img id='authAvatar' class='auth-avatar' alt='Аватар'><span id='authAvatarFallback' class='auth-avatar-fallback' aria-label='Аватар'>👤</span><span id='authStatus' class='auth-status'><i class='sync-dot'></i>Локально</span><button id='authBtn' class='auth-btn' type='button' onclick='handleAuthButton()'>Увійти</button></div><nav class='tabs'><button data-tab='dash' class='active'>Дашборд</button><button data-tab='journal'>Журнал</button><button data-tab='add'>+ Нова угода</button><button data-tab='analytics'>Аналітика</button><button data-tab='calculator'>Калькулятор</button><button data-tab='aiReview' class='ai-tab locked'>🔒 AI Розбір</button><button data-tab='settings'>Налаштування</button></nav></div></header><main>
+<header><div class='wrap top'><div class='brand-lockup'><div class='brand'><span class='brand-smart'>Розумний</span> <span class='brand-rest'>трейдинг-журнал</span></div><div class='brand-tagline'><span class='mini-candles'><i></i><i></i><i></i></span><b>Трейдинг</b><span>|</span><em>Не кнопка бабло</em></div></div><div class='auth-box'><img id='authAvatar' class='auth-avatar' alt='Аватар'><span id='authAvatarFallback' class='auth-avatar-fallback' aria-label='Аватар'>👤</span><span id='authStatus' class='auth-status'><i class='sync-dot'></i>Локально</span><button id='authBtn' class='auth-btn' type='button' onclick='handleAuthButton()'>Увійти</button></div><nav class='tabs'><button data-tab='dash' class='active'>Дашборд</button><button data-tab='journal'>Журнал</button><button data-tab='add'>+ Нова угода</button><button data-tab='analytics'>Аналітика</button><button data-tab='calculator'>Калькулятор</button><button data-tab='aiReview' class='ai-tab locked'>🔒 AI Розбір</button><button data-tab='settings'>Налаштування</button></nav></div></header><main>
 <section id='dash' class='active'><h2>Дашборд</h2><div id='metrics' class='grid'></div><div id='hundredChallenge' class='card challenge-card'></div><div class='dashboard-main'>
   <div class='dashboard-calendar-col'>
     <div class='mini-calendar-slot'><div class='card news-calendar'>
