@@ -967,7 +967,19 @@ body.trade-editing #add h2::after{content:' · редагування';color:var
 @media(max-width:900px){.settings-grid{grid-template-columns:1fr}.settings-stats{grid-template-columns:1fr 1fr 1fr}}
 @media(max-width:600px){.settings-stats,.settings-fields{grid-template-columns:1fr}}
 
-</style><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script></head><body>
+
+.settings-transfer-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.settings-transfer-box{background:#0d1620;border:1px solid #223243;border-radius:15px;padding:17px}
+.settings-transfer-title{font-weight:850;color:#eef5ff;font-size:15px}
+.settings-transfer-sub{color:#7f90a4;font-size:12px;margin-top:4px}
+.settings-dropzone{margin-top:14px;border:1px dashed #34506a;border-radius:14px;min-height:128px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;background:#0a131c;text-align:center;padding:18px;transition:.2s}
+.settings-dropzone.drag{border-color:#5bd69a;background:#0d1d1a}
+.settings-dropzone b{color:#dfeaf5}.settings-dropzone span{color:#7f90a4;font-size:12px}
+.settings-import-preview{margin-top:12px;padding:13px;border:1px solid #29415a;border-radius:12px;background:#0b141e;color:#cbd8e6;font-size:13px;line-height:1.5}
+.settings-import-preview strong{color:#5bd69a}
+@media(max-width:800px){.settings-transfer-grid{grid-template-columns:1fr}}
+
+</style><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script></head><body>
 <div class="market-art-bg" aria-hidden="true">
   <div class="market-chart-line"></div>
   <div class="market-bull">♉</div>
@@ -1115,15 +1127,34 @@ body.trade-editing #add h2::after{content:' · редагування';color:var
       <div class='settings-note' id='settingsDataNote'>Увійди в акаунт, щоб синхронізувати журнал між пристроями.</div>
     </div>
 
-    <div class='card settings-card'>
-      <h3>Резервна копія</h3>
-      <p class='settings-desc'>Збережи копію журналу окремим JSON-файлом або віднови дані з раніше створеної копії.</p>
-      <input class='settings-file' id='jsonImport' type='file' accept='.json,application/json'>
-      <div class='settings-actions'>
-        <button class='btn primary' type='button' id='export'>Експорт JSON</button>
-        <button class='btn' type='button' id='importJsonBtn'>Імпорт JSON</button>
+    <div class='card settings-card settings-full'>
+      <h3>Імпорт та експорт журналу</h3>
+      <p class='settings-desc'>Збережи журнал у зручному форматі або перенеси угоди з іншого сервісу. JSON — повна резервна копія; CSV та Excel — для таблиць і аналізу.</p>
+
+      <div class='settings-transfer-grid'>
+        <div class='settings-transfer-box'>
+          <div class='settings-transfer-title'>Експорт журналу</div>
+          <div class='settings-transfer-sub'>Вивантажити всі поточні угоди</div>
+          <div class='settings-actions'>
+            <button class='btn primary' type='button' id='export'>JSON</button>
+            <button class='btn' type='button' id='exportCsv'>CSV</button>
+            <button class='btn' type='button' id='exportXlsx'>Excel .xlsx</button>
+          </div>
+          <div class='settings-note'>JSON найкраще підходить для повного відновлення журналу. CSV / Excel — для Google Sheets, Excel та зовнішнього аналізу.</div>
+        </div>
+
+        <div class='settings-transfer-box'>
+          <div class='settings-transfer-title'>Імпорт журналу</div>
+          <div class='settings-transfer-sub'>JSON, CSV, Excel або CSV з Notion</div>
+          <input class='settings-file' id='journalImport' type='file' accept='.json,.csv,.xlsx,application/json,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'>
+          <div class='settings-dropzone' id='journalDropzone'>
+            <b>Перетягни файл сюди</b>
+            <span>або обери файл з пристрою</span>
+            <button class='btn' type='button' id='importJournalBtn'>Вибрати файл</button>
+          </div>
+          <div class='settings-import-preview' id='importPreview' hidden></div>
+        </div>
       </div>
-      <div class='settings-note'>Імпорт не видаляє наявні угоди: записи з однаковим номером оновляться, нові — додадуться.</div>
     </div>
 
     <div class='card settings-card'>
@@ -1823,36 +1854,104 @@ e.target.reset();setTodayDate();applyPreferences(true);
 $('#saved').textContent=wasEditing?'Зміни збережено ✓':'Збережено ✓';setTimeout(()=>$('#saved').textContent='',1500);
 if(wasEditing){finishTradeEditing();activateTab('journal')}
 };
+function downloadBlob(blob,name){
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1200);
+}
+function flatTrade(t){
+  return {
+    '№':t.id||'','Дата':t.date||'','Пара':t.pair||'','Сесія':t.session||'','Напрямок':t.side||'',
+    'Тип входу':t.entryType||'','Модель':t.model||'','POI':t.poi||'','Оцінка':t.grade||'',
+    'HTF тренд':t.trend||'','Sweep':t.sweep||'','Ліквідність':t.liquidity||'',
+    'Ризик %':t.risk??'','Результат':t.result||'','R':t.r??'','Нотатки':t.notes||'',
+    'Скрін ДО':t.before||t.screenshotBefore||'','Скрін ПІСЛЯ':t.after||t.screenshotAfter||''
+  };
+}
 $('#export').onclick=()=>{
   const backup={version:2,exportedAt:new Date().toISOString(),trades};
-  let a=document.createElement('a');
-  a.href=URL.createObjectURL(new Blob([JSON.stringify(backup,null,2)],{type:'application/json'}));
-  a.download='trading-journal-backup-'+new Date().toISOString().slice(0,10)+'.json';
-  a.click();
-  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+  downloadBlob(new Blob([JSON.stringify(backup,null,2)],{type:'application/json'}),'trading-journal-backup-'+new Date().toISOString().slice(0,10)+'.json');
 };
-document.getElementById('importJsonBtn')?.addEventListener('click',()=>document.getElementById('jsonImport')?.click());
-document.getElementById('jsonImport')?.addEventListener('change',e=>{
-  const f=e.target.files?.[0];if(!f)return;
-  const r=new FileReader();
-  r.onload=()=>{
-    try{
-      const parsed=JSON.parse(r.result), incoming=Array.isArray(parsed)?parsed:parsed?.trades;
-      if(!Array.isArray(incoming))throw new Error('У файлі не знайдено список угод.');
-      if(!cloudUser){alert('Спочатку увійди в акаунт, щоб імпортовані дані можна було синхронізувати.');e.target.value='';return}
-      if(!confirm(`Імпортувати ${incoming.length} угод? Записи з однаковим номером будуть оновлені.`)){e.target.value='';return}
-      const byId=new Map(trades.map(t=>[String(t.id||''),t]));
-      incoming.filter(x=>x&&typeof x==='object').forEach(t=>{
-        if(t.id)byId.set(String(t.id),t);else byId.set('import-'+crypto.randomUUID(),t);
-      });
-      trades=[...byId.values()];
-      save();render();
-      alert('Резервну копію імпортовано.');
-    }catch(err){alert('Не вдалося імпортувати JSON: '+err.message)}
-    e.target.value='';
-  };
-  r.readAsText(f);
+document.getElementById('exportCsv')?.addEventListener('click',()=>{
+  const rows=trades.map(flatTrade),headers=Object.keys(flatTrade({}));
+  const escCsv=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
+  const csv='\uFEFF'+[headers.map(escCsv).join(','),...rows.map(r=>headers.map(h=>escCsv(r[h])).join(','))].join('\r\n');
+  downloadBlob(new Blob([csv],{type:'text/csv;charset=utf-8'}),'trading-journal-'+new Date().toISOString().slice(0,10)+'.csv');
 });
+document.getElementById('exportXlsx')?.addEventListener('click',()=>{
+  if(!window.XLSX)return alert('Модуль Excel не завантажився. Онови сторінку та спробуй ще раз.');
+  const ws=XLSX.utils.json_to_sheet(trades.map(flatTrade)),wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Угоди');XLSX.writeFile(wb,'trading-journal-'+new Date().toISOString().slice(0,10)+'.xlsx');
+});
+function normalizeImportedRow(row){
+  const g=(...keys)=>{for(const k of keys){if(row[k]!==undefined&&row[k]!==null&&String(row[k]).trim()!=='')return row[k]}return''};
+  let rawId=String(g('id','№','#','Trade','Номер')||'').trim();
+  let num=(rawId.match(/\d+/)||[])[0];
+  const id=num?'Trade №'+num:rawId;
+  const risk=String(g('risk','Ризик %','Ризик, %','Ризик')).replace('%','').trim();
+  const r=String(g('r','R','RR')).replace(',','.').trim();
+  const result=String(g('result','Результат')).trim() || (+r>0?'TP':+r<0?'SL':'BE');
+  return {
+    id,date:g('date','Дата','Дата, час'),pair:g('pair','Пара'),session:g('session','Сесія'),
+    side:g('side','Напрямок','Позиція'),entryType:g('entryType','Тип входу'),model:g('model','Модель','Multi-select'),
+    poi:g('poi','POI'),grade:g('grade','Оцінка'),trend:g('trend','HTF тренд'),sweep:g('sweep','Sweep'),
+    liquidity:g('liquidity','Ліквідність'),risk:risk,r:r,result:result,notes:g('notes','Нотатки','Примітки'),
+    before:g('before','Скрін ДО','H1','H4'),after:g('after','Скрін ПІСЛЯ','m5','m15')
+  };
+}
+let pendingImport=null,pendingImportName='';
+function showImportPreview(rows,name){
+  pendingImport=rows;pendingImportName=name;
+  const p=document.getElementById('importPreview');if(!p)return;
+  p.hidden=false;p.innerHTML=`<strong>Знайдено ${rows.length} угод</strong><br>${esc(name)}<div class="settings-actions"><button class="btn primary" type="button" id="confirmImportBtn">Імпортувати</button><button class="btn" type="button" id="cancelImportBtn">Скасувати</button></div>`;
+  document.getElementById('confirmImportBtn').onclick=confirmJournalImport;
+  document.getElementById('cancelImportBtn').onclick=()=>{pendingImport=null;p.hidden=true};
+}
+function confirmJournalImport(){
+  if(!pendingImport?.length)return;
+  if(!cloudUser)return alert('Спочатку увійди в акаунт, щоб імпортовані дані синхронізувалися з хмарою.');
+  const byId=new Map(trades.map(t=>[String(t.id||''),t]));
+  pendingImport.forEach((t,i)=>{
+    let key=String(t.id||'').trim();
+    if(!key){const nums=[...byId.keys()].map(x=>+(String(x).match(/\d+/)||[0])[0]);key='Trade №'+(Math.max(0,...nums)+1);t.id=key}
+    byId.set(key,Object.assign({},byId.get(key)||{},t,{id:key}));
+  });
+  trades=[...byId.values()];pendingImport=null;save();render();
+  const p=document.getElementById('importPreview');if(p){p.innerHTML='<strong>Імпорт завершено ✓</strong>';setTimeout(()=>p.hidden=true,1800)}
+}
+async function parseJournalFile(file){
+  const ext=(file.name.split('.').pop()||'').toLowerCase();
+  if(ext==='json'){
+    const parsed=JSON.parse(await file.text()),arr=Array.isArray(parsed)?parsed:parsed?.trades;
+    if(!Array.isArray(arr))throw new Error('У JSON не знайдено список угод.');
+    return arr.map(x=>normalizeImportedRow(x));
+  }
+  if(ext==='csv'){
+    const text=await file.text();
+    if(!window.XLSX)throw new Error('Модуль імпорту таблиць не завантажився.');
+    const wb=XLSX.read(text,{type:'string'}),ws=wb.Sheets[wb.SheetNames[0]];
+    return XLSX.utils.sheet_to_json(ws,{defval:''}).map(normalizeImportedRow);
+  }
+  if(ext==='xlsx'){
+    if(!window.XLSX)throw new Error('Модуль Excel не завантажився.');
+    const buf=await file.arrayBuffer(),wb=XLSX.read(buf,{type:'array'}),ws=wb.Sheets[wb.SheetNames[0]];
+    return XLSX.utils.sheet_to_json(ws,{defval:''}).map(normalizeImportedRow);
+  }
+  throw new Error('Підтримуються JSON, CSV та XLSX.');
+}
+async function handleJournalFile(file){
+  if(!file)return;
+  try{
+    const rows=(await parseJournalFile(file)).filter(x=>x&&Object.values(x).some(v=>String(v??'').trim()));
+    if(!rows.length)throw new Error('У файлі не знайдено угод.');
+    showImportPreview(rows,file.name);
+  }catch(err){alert('Не вдалося прочитати файл: '+err.message)}
+}
+const journalImport=document.getElementById('journalImport'),drop=document.getElementById('journalDropzone');
+document.getElementById('importJournalBtn')?.addEventListener('click',()=>journalImport?.click());
+journalImport?.addEventListener('change',e=>{handleJournalFile(e.target.files?.[0]);e.target.value=''});
+drop?.addEventListener('dragover',e=>{e.preventDefault();drop.classList.add('drag')});
+drop?.addEventListener('dragleave',()=>drop.classList.remove('drag'));
+drop?.addEventListener('drop',e=>{e.preventDefault();drop.classList.remove('drag');handleJournalFile(e.dataTransfer.files?.[0])});
 document.getElementById('settingsAuthBtn')?.addEventListener('click',handleAuthButton);
 document.getElementById('savePreferences')?.addEventListener('click',()=>{
   const pair=document.getElementById('defaultPair')?.value||'EURUSD';
