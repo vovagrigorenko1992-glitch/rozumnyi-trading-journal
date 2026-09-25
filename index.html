@@ -1138,15 +1138,15 @@ body.trade-editing #add h2::after{content:' · редагування';color:var
           <div class='settings-actions'>
             <button class='btn primary' type='button' id='export'>JSON</button>
             <button class='btn' type='button' id='exportCsv'>CSV</button>
-            <button class='btn' type='button' id='exportXlsx'>Excel .xlsx</button>
+            <button class='btn' type='button' id='exportXlsx'>Excel .xls</button>
           </div>
           <div class='settings-note'>JSON найкраще підходить для повного відновлення журналу. CSV / Excel — для Google Sheets, Excel та зовнішнього аналізу.</div>
         </div>
 
         <div class='settings-transfer-box'>
           <div class='settings-transfer-title'>Імпорт журналу</div>
-          <div class='settings-transfer-sub'>JSON, CSV, Excel або CSV з Notion</div>
-          <input class='settings-file' id='journalImport' type='file' accept='.json,.csv,.xlsx,application/json,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'>
+          <div class='settings-transfer-sub'>JSON, CSV, Excel (.xlsx/.xls) або CSV з Notion</div>
+          <input class='settings-file' id='journalImport' type='file' accept='.json,.csv,.xlsx,.xls,application/json,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'>
           <div class='settings-dropzone' id='journalDropzone'>
             <b>Перетягни файл сюди</b>
             <span>або обери файл з пристрою</span>
@@ -1927,9 +1927,12 @@ document.getElementById('exportCsv')?.addEventListener('click',()=>{
   downloadBlob(new Blob([csv],{type:'text/csv;charset=utf-8'}),'trading-journal-'+new Date().toISOString().slice(0,10)+'.csv');
 });
 document.getElementById('exportXlsx')?.addEventListener('click',()=>{
-  if(!window.XLSX)return alert('Модуль Excel не завантажився. Онови сторінку та спробуй ще раз.');
-  const ws=XLSX.utils.json_to_sheet(trades.map(flatTrade)),wb=XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb,ws,'Угоди');XLSX.writeFile(wb,'trading-journal-'+new Date().toISOString().slice(0,10)+'.xlsx');
+  const rows=trades.map(flatTrade),headers=Object.keys(flatTrade({}));
+  const xmlEsc=v=>String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const head=headers.map(h=>`<th>${xmlEsc(h)}</th>`).join('');
+  const body=rows.map(r=>`<tr>${headers.map(h=>`<td>${xmlEsc(r[h])}</td>`).join('')}</tr>`).join('');
+  const book=`<!doctype html><html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel"><head><meta charset="utf-8"><meta name="ProgId" content="Excel.Sheet"><style>table{border-collapse:collapse;font-family:Arial,sans-serif}th,td{border:1px solid #bbb;padding:6px;vertical-align:top}th{font-weight:700;background:#eef3f8}</style></head><body><table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></body></html>`;
+  downloadBlob(new Blob(['\ufeff'+book],{type:'application/vnd.ms-excel;charset=utf-8'}),'trading-journal-'+new Date().toISOString().slice(0,10)+'.xls');
 });
 function normalizeImportedRow(row){
   const g=(...keys)=>{for(const k of keys){if(row[k]!==undefined&&row[k]!==null&&String(row[k]).trim()!=='')return row[k]}return''};
