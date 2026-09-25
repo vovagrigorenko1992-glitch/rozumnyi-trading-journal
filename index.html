@@ -1345,12 +1345,36 @@ function finishTradeEditing(){
   let h=$('#add h2');if(h)h.textContent='Нова угода';
   let btn=$('#tradeForm').querySelector("button[type='submit'],button:not([type])");if(btn)btn.textContent='Зберегти угоду';
 }
-function deleteTrade(i){
-  let t=trades[i];if(!t)return;
+async function deleteTrade(i){
+  const t=trades[i];if(!t)return;
   if(!confirm(`Видалити ${t.id||'цю угоду'}?\n\nЦю дію неможливо скасувати.`))return;
+
+  const key=tradeKey(t);
   trades.splice(i,1);
   closeTradeDetail();
-  save();render();
+  if(cloudUser)localStorage.setItem(userStorageKey(cloudUser.id),JSON.stringify(trades));
+  render();
+
+  if(!cloudUser||!sb)return;
+  setAuthUI('Видалення…','busy');
+  try{
+    const uid=cloudUser.id;
+    const {data:rows,error:readErr}=await sb.from('trades').select('id,trade_data').eq('user_id',uid);
+    if(readErr)throw readErr;
+    const ids=(rows||[]).filter(r=>tradeKey(r.trade_data)===key).map(r=>r.id);
+    if(ids.length){
+      const {error:delErr}=await sb.from('trades').delete().in('id',ids).eq('user_id',uid);
+      if(delErr)throw delErr;
+    }
+    lastCloudSyncAt=new Date();
+    setAuthUI(cloudUser.email||'Синхронізовано','ok');
+    renderSettings();
+  }catch(e){
+    console.error(e);
+    setAuthUI('Помилка видалення','err');
+    alert('Не вдалося видалити угоду з хмари. Онови сторінку та спробуй ще раз.');
+    try{await loadAccountData()}catch(_){}
+  }
 }
 function closeTradeDetail(){$('#tradeDetail').classList.remove('open')}
 $('#tradeDetail').onclick=e=>{if(e.target.id==='tradeDetail')closeTradeDetail()};document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeTradeDetail();closeImageLightbox()}});
@@ -1987,7 +2011,9 @@ function setAuthUI(text,state=''){const s=document.getElementById('authStatus'),
     if(fallback)fallback.style.display='none';
   }}
 function tradeKey(t){
-  const id=String(t?.id||'').trim();
+  let id=String(t?.id||'').trim();
+  const m=id.match(/^Trade\s*[#№]\s*(\d+)$/i);
+  if(m)id='Trade №'+m[1];
   if(id)return id;
   return [t?.date,t?.pair,t?.session,t?.side,t?.model,t?.r].map(x=>String(x??'')).join('|');
 }
@@ -2050,22 +2076,18 @@ async function loadAccountData(){
       if(fixErr)console.error('Не вдалося нормалізувати номер угоди',fixErr);
     }
   }
-  trades=rows.map(x=>x.trade_data).filter(Boolean);
-
-  // One-time recovery for the historical journal: Trade №37 was accidentally deleted.
-  // Restore only when the account clearly contains the original historical sequence.
-  const nums=new Set(trades.map(tradeNumber));
-  if(!nums.has(37)&&nums.has(1)&&nums.has(36)&&nums.has(38)&&nums.has(44)&&trades.length>=40){
-    try{
-      const seedRows=JSON.parse(document.getElementById('seed-data')?.textContent||'[]');
-      const seed37=seedRows.find(x=>String(x['№']||'').trim()==='Trade №37');
-      if(seed37){
-        const restored=parseSeedRow(seed37);
-        const {error:restoreErr}=await sb.from('trades').insert({user_id:uid,trade_data:restored});
-        if(restoreErr)console.error('Не вдалося відновити Trade №37',restoreErr);
-        else trades.push(restored);
-      }
-    }catch(e){console.error('Помилка відновлення Trade №37',e)}
+  // Deduplicate cloud rows by normalized trade number/key.
+  // Keep the newest row and remove older duplicate Supabase rows.
+  const unique=new Map(),duplicateRowIds=[];
+  [...rows].sort((a,b)=>String(b.updated_at||'').localeCompare(String(a.updated_at||''))).forEach(row=>{
+    const key=tradeKey(row.trade_data);
+    if(unique.has(key))duplicateRowIds.push(row.id);
+    else unique.set(key,row);
+  });
+  trades=[...unique.values()].map(x=>x.trade_data).filter(Boolean);
+  if(duplicateRowIds.length){
+    const {error:dedupeErr}=await sb.from('trades').delete().in('id',duplicateRowIds).eq('user_id',uid);
+    if(dedupeErr)console.error('Не вдалося видалити дублікати угод',dedupeErr);
   }
 
   localStorage.setItem(userStorageKey(uid),JSON.stringify(trades));
