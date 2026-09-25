@@ -1131,7 +1131,9 @@ function parseTradeDate(v){if(!v)return null;let x=String(v).trim().split(/[ ,T]
 const uaMonths=['Січень','Лютий','Березень','Квітень','Травень','Червень','Липень','Серпень','Вересень','Жовтень','Листопад','Грудень'];
 function monthKey(t){let d=parseTradeDate(t.date);return d?`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`:'0000-00'}
 function monthTitle(key){if(key==='0000-00')return 'Без дати';let [y,m]=key.split('-').map(Number);return `${uaMonths[m-1]} ${y}`}
-function badgeClass(prefix,v){return prefix+'-'+String(v||'other').toLowerCase().replaceAll('/','-').replaceAll(' ','-')}function tradeTable(a){return `<div class='card tablewrap month-table'><table><thead><tr><th>#</th><th>Дата</th><th>Пара</th><th>Сесія</th><th>Напрямок</th><th>Модель</th><th>R</th><th>Результат</th><th>Нотатки</th></tr></thead><tbody>${[...a].reverse().map(t=>{let rv=+t.r||0;return `<tr class='trade-row' data-trade-index='${trades.indexOf(t)}'><td><span class='trade-id'>${t.id||'#'+(trades.indexOf(t)+1)}</span></td><td class='date-cell'>${t.date||''}</td><td><span class='pair-badge'>${t.pair||''}</span></td><td><span class='session-badge ${badgeClass('session',t.session)}'>${t.session||''}</span></td><td><span class='side-badge ${badgeClass('side',t.side)}'>${t.side||''}</span></td><td><span class='model-badge ${['OB','FVG','STB/BTS'].includes(t.model)?badgeClass('model',t.model):'model-other'}'>${t.model||''}</span></td><td class='${rv>0?'r-pos':rv<0?'r-neg':'r-zero'}'>${rv>0?'+':''}${rv}R</td><td><span class='result-badge ${badgeClass('result',t.result)}'>${t.result||''}</span></td><td class='notes-cell' title='${(t.notes||'').replaceAll("'",'')}'>${(t.notes||'').slice(0,58)}</td></tr>`}).join('')}</tbody></table></div>`}
+function badgeClass(prefix,v){return prefix+'-'+String(v||'other').toLowerCase().replaceAll('/','-').replaceAll(' ','-')}function tradeNumber(t){let m=String(t?.id||'').match(/(?:№|#)\s*(\d+)/);return m?+m[1]:0}
+function displayTradeId(t){let n=tradeNumber(t);return n?'Trade №'+n:String(t?.id||'')}
+function tradeTable(a){return `<div class='card tablewrap month-table'><table><thead><tr><th>#</th><th>Дата</th><th>Пара</th><th>Сесія</th><th>Напрямок</th><th>Модель</th><th>R</th><th>Результат</th><th>Нотатки</th></tr></thead><tbody>${[...a].sort((x,y)=>tradeNumber(y)-tradeNumber(x)).map(t=>{let rv=+t.r||0;return `<tr class='trade-row' data-trade-index='${trades.indexOf(t)}'><td><span class='trade-id'>${displayTradeId(t)||'Trade №'+(trades.indexOf(t)+1)}</span></td><td class='date-cell'>${t.date||''}</td><td><span class='pair-badge'>${t.pair||''}</span></td><td><span class='session-badge ${badgeClass('session',t.session)}'>${t.session||''}</span></td><td><span class='side-badge ${badgeClass('side',t.side)}'>${t.side||''}</span></td><td><span class='model-badge ${['OB','FVG','STB/BTS'].includes(t.model)?badgeClass('model',t.model):'model-other'}'>${t.model||''}</span></td><td class='${rv>0?'r-pos':rv<0?'r-neg':'r-zero'}'>${rv>0?'+':''}${rv}R</td><td><span class='result-badge ${badgeClass('result',t.result)}'>${t.result||''}</span></td><td class='notes-cell' title='${(t.notes||'').replaceAll("'",'')}'>${(t.notes||'').slice(0,58)}</td></tr>`}).join('')}</tbody></table></div>`}
 function renderRows(){let fs=$('#fSession').value,fd=$('#fSide').value,fr=$('#fResult').value;let a=trades.filter(t=>(!fs||t.session==fs)&&(!fd||t.side==fd)&&(!fr||t.result==fr));let months={};a.forEach(t=>(months[monthKey(t)]??=[]).push(t));let keys=Object.keys(months).sort().reverse();$('#rows').innerHTML=keys.length?keys.map((k,i)=>{let arr=months[k],st=stats(arr);return `<div class='month-folder ${i===0?'open':''}'><button class='month-head' type='button'><span><span class='month-arrow'>›</span><b>${monthTitle(k)}</b></span><span class='month-summary'><span class='month-chip'>${arr.length} угод</span><span class='month-chip ${st.sum>=0?'pos':'neg'}'>${st.sum>=0?'+':''}${st.sum.toFixed(1)}R</span><span class='month-chip'>${st.wr.toFixed(1)}% WR</span><span class='month-chip income-chip ${st.income>=0?'pos':'neg'}'>${st.income>=0?'+':''}${st.income.toFixed(2)}% дохід</span></span></button><div class='month-body'>${tradeTable(arr)}</div></div>`}).join(''):`<div class='card muted'>Угод за цими фільтрами немає.</div>`;$$('.month-head').forEach(h=>h.onclick=()=>h.parentElement.classList.toggle('open'));$$('.trade-row').forEach(r=>r.onclick=()=>openTradeDetail(+r.dataset.tradeIndex))}
 function esc(v){return String(v??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;')}
 function openImageLightbox(src){const box=document.getElementById('imageLightbox'),img=document.getElementById('lightboxImage');if(!box||!img||!src)return;img.src=src;box.classList.add('open')}
@@ -1145,7 +1147,7 @@ function multiShotDetail(title,arr,fallback,defaultTf){
   if(!shots.length&&fallback){let isTv=validTradingViewUrl(fallback);shots=[{tf:defaultTf,data:isTv?'':fallback,url:isTv?fallback:''}]}
   return `<div class="detail-notes"><span class="muted">${title}</span>${shots.length?`<div class="detail-shot-grid">${shots.map(s=>`<div class="detail-shot-mini">${s.data?`<img src="${esc(s.data)}" alt="${esc(s.tf||defaultTf)}" onclick="openImageLightbox(this.src)">`:s.url?`<a class="detail-tv-card" href="${esc(s.url)}" target="_blank" rel="noopener"><b>TradingView</b><small>Відкрити графік ↗</small></a>`:''}<span>${esc(s.tf||defaultTf)}</span></div>`).join('')}</div>`:`<div style="margin-top:7px">Немає скрінів</div>`}</div>`;
 }
-function openTradeDetail(i){let t=trades[i];if(!t)return;let rv=+t.r||0;let links=[['H4',t.h4],['H1',t.h1],['M15',t.m15],['M5',t.m5]].filter(x=>x[1]);let before=t.before||t.h1||t.h4||'';let after=t.after||t.m5||t.m15||'';$('#tradeDetailContent').innerHTML=`<div class='detail-head'><div class='detail-title'><h3>${esc(t.id||'Угода')}</h3><span class='result-badge ${badgeClass('result',t.result)}'>${esc(t.result)}</span><span class='${rv>0?'r-pos':rv<0?'r-neg':'r-zero'}'>${rv>0?'+':''}${rv}R</span></div><div class='trade-head-actions'><button type='button' class='btn edit-trade' onclick='editTrade(${i})'>✏️ Редагувати</button><button type='button' class='btn delete-trade' onclick='deleteTrade(${i})'>🗑 Видалити</button></div><button class='close-modal' onclick='closeTradeDetail()'>×</button></div><div class='detail-body'><div class='detail-grid'><div class='detail-box'><span>Дата</span><b>${esc(t.date||'—')}</b></div><div class='detail-box'><span>Пара</span><b>${esc(t.pair||'—')}</b></div><div class='detail-box'><span>Сесія</span><b>${esc(t.session||'—')}</b></div><div class='detail-box'><span>Напрямок</span><b>${esc(t.side||'—')}</b></div><div class='detail-box'><span>Тип входу</span><b>${esc(t.entryType||'—')}</b></div><div class='detail-box'><span>POI</span><b>${esc(t.poi||'—')}</b></div><div class='detail-box'><span>Модель</span><b>${esc(t.model||'—')}</b></div><div class='detail-box'><span>Ризик</span><b>${esc(t.risk??'—')}%</b></div><div class='detail-box'><span>HTF тренд</span><b>${esc(t.trend||'—')}</b></div><div class='detail-box'><span>Зняття ліквідності</span><b>${esc(t.sweep||'—')}</b></div></div><div class='detail-notes'><span class='muted'>Нотатки</span><div style='margin-top:7px'>${esc(t.notes||'Нотаток немає')}</div></div>${multiShotDetail('Скрін ДО',t.shotsBefore,before,'H1')}${multiShotDetail('Скрін ПІСЛЯ',t.shotsAfter,after,'M5')}${links.length?`<div class='detail-links'>${links.map(([n,u])=>`<a href='${esc(u)}' target='_blank' rel='noopener'>${n} ↗</a>`).join('')}</div>`:''}</div>`;$('#tradeDetail').classList.add('open')}
+function openTradeDetail(i){let t=trades[i];if(!t)return;let rv=+t.r||0;let links=[['H4',t.h4],['H1',t.h1],['M15',t.m15],['M5',t.m5]].filter(x=>x[1]);let before=t.before||t.h1||t.h4||'';let after=t.after||t.m5||t.m15||'';$('#tradeDetailContent').innerHTML=`<div class='detail-head'><div class='detail-title'><h3>${esc(displayTradeId(t)||'Угода')}</h3><span class='result-badge ${badgeClass('result',t.result)}'>${esc(t.result)}</span><span class='${rv>0?'r-pos':rv<0?'r-neg':'r-zero'}'>${rv>0?'+':''}${rv}R</span></div><div class='trade-head-actions'><button type='button' class='btn edit-trade' onclick='editTrade(${i})'>✏️ Редагувати</button><button type='button' class='btn delete-trade' onclick='deleteTrade(${i})'>🗑 Видалити</button></div><button class='close-modal' onclick='closeTradeDetail()'>×</button></div><div class='detail-body'><div class='detail-grid'><div class='detail-box'><span>Дата</span><b>${esc(t.date||'—')}</b></div><div class='detail-box'><span>Пара</span><b>${esc(t.pair||'—')}</b></div><div class='detail-box'><span>Сесія</span><b>${esc(t.session||'—')}</b></div><div class='detail-box'><span>Напрямок</span><b>${esc(t.side||'—')}</b></div><div class='detail-box'><span>Тип входу</span><b>${esc(t.entryType||'—')}</b></div><div class='detail-box'><span>POI</span><b>${esc(t.poi||'—')}</b></div><div class='detail-box'><span>Модель</span><b>${esc(t.model||'—')}</b></div><div class='detail-box'><span>Ризик</span><b>${esc(t.risk??'—')}%</b></div><div class='detail-box'><span>HTF тренд</span><b>${esc(t.trend||'—')}</b></div><div class='detail-box'><span>Зняття ліквідності</span><b>${esc(t.sweep||'—')}</b></div></div><div class='detail-notes'><span class='muted'>Нотатки</span><div style='margin-top:7px'>${esc(t.notes||'Нотаток немає')}</div></div>${multiShotDetail('Скрін ДО',t.shotsBefore,before,'H1')}${multiShotDetail('Скрін ПІСЛЯ',t.shotsAfter,after,'M5')}${links.length?`<div class='detail-links'>${links.map(([n,u])=>`<a href='${esc(u)}' target='_blank' rel='noopener'>${n} ↗</a>`).join('')}</div>`:''}</div>`;$('#tradeDetail').classList.add('open')}
 
 let editingTradeIndex=null;
 function activateTab(tab){
@@ -1682,7 +1684,7 @@ o.shotsAfter=pendingShotGroups.after.filter(x=>x.data||x.url).map(x=>({tf:x.tf,d
 o.before=o.shotsBefore[0]?.data||o.shotsBefore[0]?.url||'';o.after=o.shotsAfter[0]?.data||o.shotsAfter[0]?.url||'';
 o.model=String(o.model||'').trim();if(o.model&&!entryModels.includes(o.model)){entryModels.push(o.model);saveEntryModels()}o.pair=String(o.pair||'').trim().toUpperCase();if(o.pair&&!instruments.includes(o.pair)){instruments.push(o.pair);saveInstruments()}
 let wasEditing=editingTradeIndex!==null&&trades[editingTradeIndex];
-if(wasEditing){o.id=trades[editingTradeIndex].id||('Trade #'+(editingTradeIndex+1));trades[editingTradeIndex]=o}else{o.id='Trade #'+(trades.length+1);trades.push(o)}
+if(wasEditing){o.id=trades[editingTradeIndex].id||('Trade №'+(editingTradeIndex+1));trades[editingTradeIndex]=o}else{o.id='Trade №'+(trades.length+1);trades.push(o)}
 save();render();
 pendingShotGroups={before:[emptyShot('H1')],after:[emptyShot('M5')]};renderShotGroup('before');renderShotGroup('after');updateTradeCompletion();
 e.target.reset();setTodayDate();
@@ -1768,7 +1770,36 @@ async function loadAccountData(){
   if(error)throw error;
   if(!cloudUser||cloudUser.id!==uid)return;
 
-  trades=(data||[]).map(x=>x.trade_data).filter(Boolean);
+  // Normalize old IDs that were accidentally saved as "Trade #N".
+  // Update the existing Supabase row in-place so no duplicate is created.
+  const rows=data||[];
+  for(const row of rows){
+    const t=row.trade_data;
+    const m=String(t?.id||'').match(/^Trade #\s*(\d+)$/);
+    if(m){
+      t.id='Trade №'+m[1];
+      const {error:fixErr}=await sb.from('trades').update({trade_data:t,updated_at:new Date().toISOString()}).eq('id',row.id).eq('user_id',uid);
+      if(fixErr)console.error('Не вдалося нормалізувати номер угоди',fixErr);
+    }
+  }
+  trades=rows.map(x=>x.trade_data).filter(Boolean);
+
+  // One-time recovery for the historical journal: Trade №37 was accidentally deleted.
+  // Restore only when the account clearly contains the original historical sequence.
+  const nums=new Set(trades.map(tradeNumber));
+  if(!nums.has(37)&&nums.has(1)&&nums.has(36)&&nums.has(38)&&nums.has(44)&&trades.length>=40){
+    try{
+      const seedRows=JSON.parse(document.getElementById('seed-data')?.textContent||'[]');
+      const seed37=seedRows.find(x=>String(x['№']||'').trim()==='Trade №37');
+      if(seed37){
+        const restored=parseSeedRow(seed37);
+        const {error:restoreErr}=await sb.from('trades').insert({user_id:uid,trade_data:restored});
+        if(restoreErr)console.error('Не вдалося відновити Trade №37',restoreErr);
+        else trades.push(restored);
+      }
+    }catch(e){console.error('Помилка відновлення Trade №37',e)}
+  }
+
   localStorage.setItem(userStorageKey(uid),JSON.stringify(trades));
   render();loadInstruments();loadEntryModels();
   cloudReady=true;
