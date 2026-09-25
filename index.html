@@ -1210,13 +1210,17 @@ async function init(){trades=[];render()}
 function setTodayDate(){let el=document.querySelector("#tradeForm input[name='date']");if(!el)return;let d=new Date(),y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');if(!el.value)el.value=`${y}-${m}-${day}`;if(el.showPicker)el.addEventListener('click',()=>{try{el.showPicker()}catch(e){}})}
 function save(){if(!cloudUser)return;localStorage.setItem(userStorageKey(cloudUser.id),JSON.stringify(trades));scheduleCloudSync()}
 function stats(arr=trades){let done=arr.filter(t=>['TP','SL','BE'].includes(t.result));let wins=done.filter(t=>+t.r>0);let losses=done.filter(t=>+t.r<0);let sum=done.reduce((a,t)=>a+(+t.r||0),0);let income=done.reduce((a,t)=>a+((+t.r||0)*(+t.risk||0)),0);let wr=done.length?wins.length/done.length*100:0;let gp=wins.reduce((a,t)=>a+(+t.r||0),0),gl=Math.abs(losses.reduce((a,t)=>a+(+t.r||0),0));return{n:done.length,w:wins.length,l:losses.length,sum,income,wr,pf:gl?gp/gl:0,exp:done.length?sum/done.length:0,avgWinRR:wins.length?gp/wins.length:0}}
-function hasShot(arr,fallback){return (Array.isArray(arr)&&arr.some(x=>x&&(x.data||x.url)))||!!fallback}
+function hasShot(arr,fallback){
+  const list=Array.isArray(arr)?arr:[];
+  const inList=list.some(x=>typeof x==='string'?x.trim()!=='':!!(x&&(String(x.data||'').trim()||String(x.url||'').trim())));
+  return inList||String(fallback||'').trim()!=='';
+}
 const completenessFields=[['date','Дата'],['pair','Інструмент'],['session','Сесія'],['side','Напрямок'],['model','Модель входу'],['entryType','Тип входу'],['grade','Оцінка сетапу'],['trend','HTF тренд'],['sweep','Зняття ліквідності'],['result','Результат'],['risk','Ризик'],['liquidity','Ліквідність'],['r','Результат, R'],['poi','POI'],['notes','Нотатки']];
 function tradeCompleteness(t){let total=completenessFields.length+2,filled=0,missing=[];completenessFields.forEach(([k,label])=>{let v=t?.[k];let ok=(k==='r'||k==='risk')?v!==''&&v!==null&&v!==undefined&&Number.isFinite(+v):String(v??'').trim()!=='';if(ok)filled++;else missing.push(label)});if(hasShot(t?.shotsBefore,t?.before||t?.h1||t?.h4)){filled++}else missing.push('Скрін ДО');if(hasShot(t?.shotsAfter,t?.after||t?.m5||t?.m15)){filled++}else missing.push('Скрін ПІСЛЯ');return{pct:Math.round(filled/total*100),filled,total,missing,complete:filled===total}}
 function fullTrades(){return trades.filter(t=>tradeCompleteness(t).complete)}
 function currentFormTrade(){let f=$('#tradeForm');if(!f)return{};let o=Object.fromEntries(new FormData(f));o.shotsBefore=pendingShotGroups?.before||[];o.shotsAfter=pendingShotGroups?.after||[];return o}
 function updateTradeCompletion(){let el=$('#tradeCompletionPct');if(!el)return;let c=tradeCompleteness(currentFormTrade());el.textContent=c.pct+'%';el.classList.toggle('complete',c.complete);let bar=$('#tradeCompletionBar');if(bar)bar.style.width=c.pct+'%';let miss=$('#tradeCompletionMissing');if(miss)miss.textContent=c.complete?'✓ Угода заповнена повністю й буде зарахована до цілі 100.':'Для 100% залишилось: '+c.missing.join(', ')}
-function renderHundredChallenge(){let full=fullTrades().length,count=Math.min(100,full),pct=Math.min(100,count);let el=$('#hundredChallenge');if(el){el.innerHTML=`<button type="button" class="challenge-help" aria-label="Що означає ця шкала?">?</button><div class="challenge-popover"><b>Шлях до повного AI-аналізу</b>Шкала показує, скільки <strong>повністю заповнених угод</strong> уже зібрано із потрібних 100. До прогресу зараховуються лише угоди зі всіма обов’язковими даними та скрінами ДО і ПІСЛЯ. Після 100/100 відкриється персональний AI-розбір твоєї торгівлі.</div><div class="challenge-head"><div><div class="challenge-title">Шлях до повного AI-аналізу</div><div class="challenge-sub">Зараховуються лише угоди зі 100% заповненням і скрінами ДО та ПІСЛЯ.</div></div><div class="challenge-count">${count} / 100</div></div><div class="challenge-track"><i style="width:${pct}%"></i></div><div class="challenge-foot"><span>${pct}% шляху пройдено</span><span>${count>=100?'AI Розбір розблоковано ✓':'Ще '+(100-count)+' повних угод'}</span></div>`;let help=el.querySelector('.challenge-help'),pop=el.querySelector('.challenge-popover');if(help&&pop)help.onclick=e=>{e.stopPropagation();pop.classList.toggle('open')}}let tab=document.querySelector(".ai-tab");if(tab){tab.classList.toggle('locked',count<100);tab.classList.toggle('unlocked',count>=100);tab.textContent=(count>=100?'✨':'🔒')+' AI Розбір'}}
+function renderHundredChallenge(){let full=fullTrades().length,count=Math.min(100,full),pct=Math.min(100,count);let el=$('#hundredChallenge');if(el){el.innerHTML=`<button type="button" class="challenge-help" aria-label="Що означає ця шкала?">?</button><div class="challenge-popover"><b>Шлях до повного AI-аналізу</b>Шкала показує, скільки <strong>повністю заповнених угод</strong> уже зібрано із потрібних 100. До прогресу зараховуються лише угоди зі всіма обов’язковими даними та скрінами ДО і ПІСЛЯ. Після 100/100 відкриється персональний AI-розбір твоєї торгівлі. Якщо угода не зарахована, відкрий її на редагування — шкала «Повнота угоди» покаже, якого саме поля або скріну бракує.</div><div class="challenge-head"><div><div class="challenge-title">Шлях до повного AI-аналізу</div><div class="challenge-sub">Зараховуються лише угоди зі 100% заповненням і скрінами ДО та ПІСЛЯ.</div></div><div class="challenge-count">${count} / 100</div></div><div class="challenge-track"><i style="width:${pct}%"></i></div><div class="challenge-foot"><span>${pct}% шляху пройдено</span><span>${count>=100?'AI Розбір розблоковано ✓':'Ще '+(100-count)+' повних угод'}</span></div>`;let help=el.querySelector('.challenge-help'),pop=el.querySelector('.challenge-popover');if(help&&pop)help.onclick=e=>{e.stopPropagation();pop.classList.toggle('open')}}let tab=document.querySelector(".ai-tab");if(tab){tab.classList.toggle('locked',count<100);tab.classList.toggle('unlocked',count>=100);tab.textContent=(count>=100?'✨':'🔒')+' AI Розбір'}}
 function renderAIReview(){let el=$('#aiReviewContent');if(!el)return;let full=fullTrades(),n=full.length,count=Math.min(100,n);if(n<100){el.innerHTML=`<div class="card ai-lock"><div class="ai-lock-icon">🔒</div><h3>Персональний AI-розбір ще закритий</h3><p class="muted">Спочатку збери 100 повністю задокументованих угод. Неповні записи не зараховуються.</p><div class="ai-progress-num">${count} / 100</div><div class="challenge-track"><i style="width:${count}%"></i></div><p class="muted" style="margin-top:12px">Залишилось ${100-count} повних угод.</p></div>`;return}let a=full.slice(0,100),st=stats(a);let best=(key)=>{let g={};a.forEach(t=>(g[t[key]||'—']??=[]).push(t));return Object.entries(g).map(([k,v])=>[k,stats(v),v.length]).sort((x,y)=>y[1].sum-x[1].sum)[0]};let sess=best('session'),model=best('model'),entry=best('entryType');el.innerHTML=`<div class="ai-ready"><div class="card"><h3>✨ Дані для AI-розбору готові</h3><p class="muted">100 повних угод зібрано. База достатня для персонального розбору торгових патернів.</p></div><div class="ai-ready-grid"><div class="card"><span class="muted">100 угод</span><h3>${st.sum>=0?'+':''}${st.sum.toFixed(1)}R</h3><small>${st.wr.toFixed(1)}% WR · ${st.income>=0?'+':''}${st.income.toFixed(2)}%</small></div><div class="card"><span class="muted">Найсильніша сесія у вибірці</span><h3>${esc(sess?.[0]||'—')}</h3><small>${sess?sess[2]+' угод · '+(sess[1].sum>=0?'+':'')+sess[1].sum.toFixed(1)+'R':'—'}</small></div><div class="card"><span class="muted">Найсильніша модель у вибірці</span><h3>${esc(model?.[0]||'—')}</h3><small>${model?model[2]+' угод · '+(model[1].sum>=0?'+':'')+model[1].sum.toFixed(1)+'R':'—'}</small></div></div><div class="ai-note"><b>AI-модуль розблоковано.</b><br>Інтерфейс і вибірка вже готові. Для справжнього генеративного AI-звіту потрібно підключити серверний AI endpoint, щоб API-ключ не зберігався у браузері. Поточний блок навмисно не імітує AI-висновки.</div></div>`}
 
 let lastCloudSyncAt=null;
@@ -1261,6 +1265,19 @@ function renderSettings(){
   if(dr)dr.value=String(p.risk??'.5');
 }
 
+function tradeNumber(t){return +((String(t?.id||'').match(/\d+/)||[0])[0])||0}
+function tradeDateValue(t){
+  const s=String(t?.date||'').trim();let m=s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if(m)return Date.UTC(+m[1],+m[2]-1,+m[3]);
+  m=s.match(/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{4})/);
+  if(m)return Date.UTC(+m[3],+m[2]-1,+m[1]);
+  const d=Date.parse(s);return Number.isFinite(d)?d:0;
+}
+function chronologicalDoneTrades(){
+  return trades.filter(t=>['TP','SL','BE'].includes(t.result)).slice()
+    .sort((a,b)=>tradeDateValue(a)-tradeDateValue(b)||tradeNumber(a)-tradeNumber(b));
+}
+
 function render(){let s=stats();let vals=[['Угоди',s.n],['Winrate',s.wr.toFixed(1)+'%'],['Сумарний R',(s.sum>=0?'+':'')+s.sum.toFixed(1)+'R'],['Середній RR',s.avgWinRR.toFixed(2)+'R'],['Дохід',(s.income>=0?'+':'')+s.income.toFixed(2)+'%']];
 let metricInfo={
 'Угоди':['Кількість завершених угод, які входять у статистику: TP, SL та BE.','N = TP + SL + BE'],
@@ -1271,19 +1288,27 @@ let metricInfo={
 };
 $('#metrics').innerHTML=vals.map((v,i)=>`<div class='card metric'><span class='muted'>${v[0]}</span><b>${v[1]}</b><button type='button' class='metric-help' data-mi='${i}'>?</button><div class='metric-popover' data-mp='${i}'><b>${v[0]}</b>${metricInfo[v[0]][0]}<span class='formula'>${metricInfo[v[0]][1]}</span></div></div>`).join('');
 $$('.metric-help').forEach(btn=>btn.onclick=e=>{e.stopPropagation();let pop=$(`.metric-popover[data-mp="${btn.dataset.mi}"]`),open=pop.classList.contains('open');$$('.metric-popover').forEach(x=>x.classList.remove('open'));if(!open)pop.classList.add('open')});
-let doneTrades=trades.filter(t=>['TP','SL','BE'].includes(t.result));
+let doneTrades=chronologicalDoneTrades();
 let eq=0, series=doneTrades.map(t=>eq+=(+t.r||0));
 let inc=0, incomeSeries=doneTrades.map(t=>inc+=((+t.r||0)*(+t.risk||0)));
 function renderMiniCurve(selector,data,unit){
   let el=$(selector);if(!el)return;
-  let rawMin=Math.min(0,...data),rawMax=Math.max(unit==='R'?1:.25,...data),span=rawMax-rawMin;
-  let rough=span/4, step=unit==='R'?Math.max(1,Math.ceil(rough)):Math.max(.25,Math.ceil(rough*4)/4);
+  if(!data.length){el.innerHTML=`<div class='muted' style='padding:20px 48px'>Ще немає завершених угод</div>`;return}
+  let rawMin=Math.min(0,...data),rawMax=Math.max(0,...data);
+  let span=Math.max(unit==='R'?1:.5,rawMax-rawMin),rough=span/4;
+  let step=unit==='R'?Math.max(1,Math.ceil(rough)):Math.max(.25,Math.ceil(rough*4)/4);
   let min=Math.floor(rawMin/step)*step,max=Math.ceil(rawMax/step)*step;if(max===min)max=min+step;
-  let range=max-min,ticks=[];for(let v=min;v<=max+step*.01;v+=step)ticks.push(+v.toFixed(4));
-  let pct=v=>(v-min)/range*100;
-  let grid=ticks.map(v=>`<div class='chart-grid-line' style='bottom:${pct(v)}%'></div>`).join('');
-  let labels=ticks.map(v=>`<span style='bottom:${pct(v)}%'>${v>0?'+':''}${unit==='R'?v.toFixed(v%1?1:0):v.toFixed(2)}${unit}</span>`).join('');
-  let bars=data.map((v,i)=>{let incomeColor=unit==='%'?(v>=0?'background:linear-gradient(180deg,#5bd69a 0%,#16a56a 65%,#0f7f50 100%);box-shadow:0 4px 14px rgba(44,190,120,.18);':'background:linear-gradient(180deg,#ff7774 0%,#ef5350 65%,#b93634 100%);box-shadow:0 4px 14px rgba(239,83,80,.18);'):'';return `<div class='chart-col'><div class='chart-bar' title='Угода ${i+1}: ${v>=0?'+':''}${unit==='R'?v.toFixed(1):v.toFixed(2)}${unit}' style='height:${Math.max(2,pct(v))}%;${incomeColor}'></div></div>`}).join('');
+  let range=max-min,y=v=>(v-min)/range*100,zero=y(0),ticks=[];
+  for(let v=min;v<=max+step*.01;v+=step)ticks.push(+v.toFixed(6));
+  let grid=ticks.map(v=>`<div class='chart-grid-line' style='bottom:${y(v)}%'></div>`).join('');
+  let labels=ticks.map(v=>`<span style='bottom:${y(v)}%'>${v>0?'+':''}${unit==='R'?v.toFixed(v%1?1:0):v.toFixed(2)}${unit}</span>`).join('');
+  let bars=data.map((v,i)=>{
+    const pos=y(v),bottom=Math.min(zero,pos),height=Math.max(2,Math.abs(pos-zero));
+    const color=unit==='R'
+      ?'background:linear-gradient(180deg,#66a0ff 0%,#4a89e8 60%,#316fd5 100%);box-shadow:0 4px 14px rgba(74,137,232,.16);'
+      :(v>=0?'background:linear-gradient(180deg,#5bd69a 0%,#16a56a 65%,#0f7f50 100%);box-shadow:0 4px 14px rgba(44,190,120,.18);':'background:linear-gradient(180deg,#ff7774 0%,#ef5350 65%,#b93634 100%);box-shadow:0 4px 14px rgba(239,83,80,.18);');
+    return `<div class='chart-col'><div class='chart-bar' title='Угода ${i+1}: ${v>=0?'+':''}${unit==='R'?v.toFixed(1):v.toFixed(2)}${unit}' style='position:absolute;bottom:${bottom}%;height:${height}%;${color}'></div></div>`;
+  }).join('');
   el.innerHTML=`<div class='chart-grid'>${grid}</div><div class='chart-y'>${labels}</div><div class='chart-bars'>${bars}</div><div class='chart-xlabel'>угоди →</div>`;
 }
 renderMiniCurve('#equity',series,'R');
