@@ -1042,7 +1042,7 @@ body.trade-editing #add h2::after{content:' · редагування';color:var
 <div class='full multi-shot-section'>
   <div class='multi-shot-head'><label>Скрін ПІСЛЯ</label><button type='button' class='btn shot-add' data-group='after'>+ Додати скрін</button></div>
   <div id='shotsAfter' class='shot-slot-grid'></div>
-</div><label class='full'>Нотатки<textarea name='notes'></textarea></label><div class='actions full'><button class='btn primary'>Зберегти угоду</button><span id='saved' class='muted'></span></div></form></div></section>
+</div><label class='full'>Нотатки<textarea name='notes'></textarea></label><div class='actions full'><button type='submit' class='btn primary'>Зберегти угоду</button><span id='saved' class='muted'></span></div></form></div></section>
 <section id='aiReview'><h2>AI Розбір</h2><div id='aiReviewContent'></div></section>
 <section id='analytics'><h2>Аналітика</h2><div id='analyticsTables' class='two'></div></section>
 
@@ -1208,7 +1208,11 @@ let trades=[]; const $=s=>document.querySelector(s), $$=s=>[...document.querySel
 function parseSeedRow(x){let rr=parseFloat(String(x['RR']).replace(',','.'))||0; return {id:x['№'],date:x['Дата, час'],session:x['Сесія'],pair:x['Пара'],model:x['Multi-select']||x['Сетап'],side:x['Позиція'],risk:parseFloat(String(x['Ризик, %']).replace('%','').replace(',','.'))||0,r:rr,result:rr>0?'TP':rr<0?'SL':'BE',notes:x['Примітки']||'',trend:'',sweep:'',grade:'',liquidity:'',before:x['H1']||x['H4']||'',after:x['m5']||x['m15']||'',h4:x['H4']||'',h1:x['H1']||'',m15:x['m15']||'',m5:x['m5']||''}}
 async function init(){trades=[];render()}
 function setTodayDate(){let el=document.querySelector("#tradeForm input[name='date']");if(!el)return;let d=new Date(),y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');if(!el.value)el.value=`${y}-${m}-${day}`;if(el.showPicker)el.addEventListener('click',()=>{try{el.showPicker()}catch(e){}})}
-function save(){if(!cloudUser)return;localStorage.setItem(userStorageKey(cloudUser.id),JSON.stringify(trades));scheduleCloudSync()}
+function save(){
+  if(!cloudUser)return;
+  saveUserCache();
+  scheduleCloudSync();
+}
 function stats(arr=trades){let done=arr.filter(t=>['TP','SL','BE'].includes(t.result));let wins=done.filter(t=>+t.r>0);let losses=done.filter(t=>+t.r<0);let sum=done.reduce((a,t)=>a+(+t.r||0),0);let income=done.reduce((a,t)=>a+((+t.r||0)*(+t.risk||0)),0);let wr=done.length?wins.length/done.length*100:0;let gp=wins.reduce((a,t)=>a+(+t.r||0),0),gl=Math.abs(losses.reduce((a,t)=>a+(+t.r||0),0));return{n:done.length,w:wins.length,l:losses.length,sum,income,wr,pf:gl?gp/gl:0,exp:done.length?sum/done.length:0,avgWinRR:wins.length?gp/wins.length:0}}
 function hasShot(arr,fallback){
   const list=Array.isArray(arr)?arr:[];
@@ -1361,14 +1365,14 @@ function editTrade(i){
   };
   renderShotGroup('before');renderShotGroup('after');
   let h=$('#add h2');if(h)h.textContent='Редагувати угоду';
-  let btn=form.querySelector("button[type='submit'],button:not([type])");if(btn)btn.textContent='Зберегти зміни';
+  let btn=form.querySelector("button[type='submit']");if(btn)btn.textContent='Зберегти зміни';
   window.scrollTo({top:0,behavior:'smooth'});
 }
 function finishTradeEditing(){
   editingTradeIndex=null;
   document.body.classList.remove('trade-editing');
   let h=$('#add h2');if(h)h.textContent='Нова угода';
-  let btn=$('#tradeForm').querySelector("button[type='submit'],button:not([type])");if(btn)btn.textContent='Зберегти угоду';
+  let btn=$('#tradeForm').querySelector("button[type='submit']");if(btn)btn.textContent='Зберегти угоду';
 }
 async function deleteTrade(i){
   const t=trades[i];if(!t)return;
@@ -2047,13 +2051,21 @@ function tradeKey(t){
 }
 function userStorageKey(uid){return 'tjv62_user_'+uid}
 function saveUserCache(){
-  if(cloudUser) localStorage.setItem(userStorageKey(cloudUser.id),JSON.stringify(trades));
+  if(!cloudUser)return;
+  try{
+    localStorage.setItem(userStorageKey(cloudUser.id),JSON.stringify(trades));
+  }catch(e){
+    // Screenshots can exceed the browser's localStorage quota.
+    // Supabase remains the source of truth, so a cache failure must never block saving a trade.
+    console.warn('Local cache skipped: browser storage quota exceeded.',e);
+    try{localStorage.removeItem(userStorageKey(cloudUser.id))}catch(_){}
+  }
 }
 function scheduleCloudSync(){
   if(!cloudReady||!cloudUser||!sb)return;
   saveUserCache();
   clearTimeout(cloudTimer);
-  cloudTimer=setTimeout(()=>syncToCloud().catch(e=>{console.error(e);setAuthUI('Помилка синхронізації')}),900);
+  cloudTimer=setTimeout(()=>syncToCloud().catch(e=>{console.error(e);setAuthUI('Помилка синхронізації')}),150);
 }
 async function syncToCloud(){
   if(!cloudReady||!cloudUser||!sb||cloudBusy)return;
