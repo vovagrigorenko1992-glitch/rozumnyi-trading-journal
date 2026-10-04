@@ -2130,7 +2130,9 @@ async function loadAccountData(){
     if(dedupeErr)console.error('Не вдалося видалити дублікати угод',dedupeErr);
   }
 
-  localStorage.setItem(userStorageKey(uid),JSON.stringify(trades));
+  // localStorage is only a cache. On mobile Safari screenshots can exceed its quota,
+  // so cache failure must never block rendering trades already loaded from Supabase.
+  saveUserCache();
   render();loadInstruments();loadEntryModels();
   cloudReady=true;
   lastCloudSyncAt=new Date();
@@ -2141,7 +2143,7 @@ async function clearCurrentAccountCloud(){
   const {error}=await sb.from('trades').delete().eq('user_id',cloudUser.id);
   if(error)throw error;
   trades=[];
-  localStorage.setItem(userStorageKey(cloudUser.id),'[]');
+  try{localStorage.setItem(userStorageKey(cloudUser.id),'[]')}catch(e){console.warn('Local cache clear skipped.',e)}
   render();loadInstruments();loadEntryModels();
 }
 
