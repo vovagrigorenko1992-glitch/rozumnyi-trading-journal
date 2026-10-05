@@ -1254,7 +1254,12 @@ const UI_EN={
 'Придивись до моделі OB':'Review the OB model',
 'Тут зараз найвище середнє:':'Current highest average:',
 'Відстежуй, чи перевага зберігається на більшій вибірці.':'Track whether the edge holds on a larger sample.',
-'Перевір, у якому контексті вона працює найкраще.':'Check the context where it performs best.'
+'Перевір, у якому контексті вона працює найкраще.':'Check the context where it performs best.',
+'Усі важливі':'All impacts',
+'ЧАС':'TIME','ВАЛЮТА':'CURRENCY','ВПЛИВ':'IMPACT','ПОДІЯ':'EVENT',
+'у середньому.':'on average.',
+'на угоду.':'per trade.'
+
 
 };
 let appLang=localStorage.getItem('tj_language')||'uk';
@@ -1276,7 +1281,9 @@ function uiTr(s){
    .replace(/Відстежуй, чи перевага зберігається на більшій вибірці\./g,'Track whether the edge holds on a larger sample.')
    .replace(/Перевір, у якому контексті вона працює найкраще\./g,'Check the context where it performs best.')
    .replace(/\bСередня\b/g,'Medium').replace(/\bВисока\b/g,'High').replace(/\bНизька\b/g,'Low')
-   .replace(/\bВесь день\b/g,'All day');
+   .replace(/\bВесь день\b/g,'All day')
+   .replace(/\bу середньому\./g,'on average.')
+   .replace(/\bна угоду\./g,'per trade.');
 }
 function applyLanguage(root=document.body){
  const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);let n;
@@ -1295,6 +1302,19 @@ function applyLanguage(root=document.body){
   if(o.textContent!==translated)o.textContent=translated;
  });
  document.querySelectorAll('.lang-btn').forEach(b=>b.classList.toggle('active',b.dataset.lang===appLang));
+ 
+ if(appLang==='en'){
+   document.querySelectorAll('#calendar select option, .calendar select option').forEach(o=>{
+     const t=o.textContent.trim();
+     if(t==='Усі важливі')o.textContent='All impacts';
+   });
+   document.querySelectorAll('#calendar th, .calendar th, .econ-calendar th, .calendar-table th').forEach(el=>{
+     const t=el.textContent.trim();
+     const map={'ЧАС':'TIME','ВАЛЮТА':'CURRENCY','ВПЛИВ':'IMPACT','ПОДІЯ':'EVENT'};
+     if(map[t])el.textContent=map[t];
+   });
+ }
+
  document.documentElement.lang=appLang==='en'?'en':'uk';
 }
 function setLanguage(lang){
