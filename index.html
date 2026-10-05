@@ -1055,7 +1055,7 @@ body.trade-editing #add h2::after{content:' · редагування';color:var
   <div class='lotcalc-layout'>
     <div class='card lotcalc-card'>
       <div class='lotcalc-head'>
-        <div><b>Розрахунок позиції</b><span>Ризик → Stop Loss → потрібний лот</span></div>
+        <div><b><span class="calc-i18n" data-uk="Розрахунок позиції" data-en="Position size calculation">Розрахунок позиції</span></b><span>Ризик → Stop Loss → потрібний лот</span></div>
         <span class='lotcalc-badge'>FX</span>
       </div>
       <div class='lotcalc-form'>
@@ -1078,7 +1078,7 @@ body.trade-editing #add h2::after{content:' · редагування';color:var
           <input id='lcStop' type='number' min='.1' step='.1' value='6.5'>
         </label>
         <label id='lcPriceWrap'>Поточна ціна
-          <input id='lcPrice' type='number' min='.00001' step='.00001' placeholder='Потрібна для USDJPY/CHF/CAD'>
+          <input id='lcPrice' type='number' min='.00001' step='.00001' placeholder='Required for USDJPY/CHF/CAD'>
         </label>
       </div>
       <div class='lotcalc-actions'>
@@ -2296,8 +2296,12 @@ async function handleAuthButton(){
 
 
 function translateCalculatorPage(){
-  if(appLang!=='en') return;
   const root=document.getElementById('calculator');
+  if(!root) return;
+  root.querySelectorAll('.calc-i18n').forEach(el=>{
+    el.textContent = appLang==='en' ? el.dataset.en : el.dataset.uk;
+  });
+  if(appLang!=='en') return;
   if(!root) return;
 
   const replacements = new Map([
@@ -2324,6 +2328,8 @@ function translateCalculatorPage(){
     if(replacements.has(t)) el.textContent=replacements.get(t);
   });
 
+  const priceInput=document.getElementById('lcPrice');
+  if(priceInput) priceInput.placeholder = appLang==='en' ? 'Required for USDJPY/CHF/CAD' : 'Потрібна для USDJPY/CHF/CAD';
   root.querySelectorAll('input').forEach(el=>{
     if(el.placeholder==='Потрібна для USDJPY/CHF/CAD')
       el.placeholder='Required for USDJPY/CHF/CAD';
