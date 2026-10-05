@@ -1243,7 +1243,23 @@ const UI_EN={
 '7 днів':'7 days','Усі валюти':'All currencies','Усі важливі':'All impacts','Усі важливості':'All impacts','↻ Оновити':'↻ Refresh','ЧАС':'TIME','ВАЛЮТА':'CURRENCY','ВПЛИВ':'IMPACT','ПОДІЯ':'EVENT','Середня':'Medium','Висока':'High','Низька':'Low','Весь день':'All day',
 'Нова угода':'New trade','Редагувати угоду':'Edit trade','Повнота угоди':'Trade completeness','Дата':'Date','Інструмент':'Instrument','Модель входу':'Entry model','Оцінка сетапу':'Setup grade','HTF тренд':'HTF trend','Зняття ліквідності':'Liquidity sweep','Результат':'Result','Ризик %':'Risk %','Ліквідність':'Liquidity','Результат, R':'Result, R','POI (зона інтересу)':'POI (area of interest)','Скрін ДО':'BEFORE screenshot','Скрін ПІСЛЯ':'AFTER screenshot','+ Додати скрін':'+ Add screenshot','Нотатки':'Notes','Зберегти угоду':'Save trade','Зберегти зміни':'Save changes',
 'Імпорт та експорт журналу':'Journal import & export','Експорт журналу':'Export journal','Імпорт журналу':'Import journal',
-'Калькулятор розміру позиції':'Position size calculator','Розрахувати':'Calculate',
+'Калькулятор розміру позиції':'Position size calculator',
+'Калькулятор лотажу':'Lot size calculator',
+'Розрахунок позиції':'Position size calculation',
+'Ризик → Stop Loss → потрібний лот':'Risk → Stop Loss → required lot size',
+'Валютна пара':'Currency pair',
+'Валюта рахунку':'Account currency',
+'Розмір рахунку, $':'Account balance, $',
+'Ризик, %':'Risk, %',
+'Поточна ціна':'Current price',
+'Потрібна для USDJPY/CHF/CAD':'Required for USDJPY/CHF/CAD',
+'Рекомендований розмір позиції':'Recommended position size',
+'Ризик грошима':'Risk amount',
+'Вартість 1 pip':'Value per pip',
+'Для EURUSD та інших пар із USD справа ціна не потрібна.':'For EURUSD and other pairs with USD as the quote currency, the current price is not required.',
+'Lot = ризик у $ ÷ (SL у pips × вартість pip для 1 lot)':'Lot = risk in $ ÷ (SL in pips × pip value for 1 lot)',
+'Скинути':'Reset',
+'Розрахувати':'Calculate',
 'Усі сесії':'All sessions','Усі результати':'All results','Пара':'Pair','Модель':'Model',
 'Січень':'January','Лютий':'February','Березень':'March','Квітень':'April','Травень':'May','Червень':'June',
 'Липень':'July','Серпень':'August','Вересень':'September','Жовтень':'October','Листопад':'November','Грудень':'December',
@@ -2337,7 +2353,6 @@ function translateCalculatorPage(){
 }
 
 function calcLotSize(){
-  setTimeout(translateCalculatorPage,0);
   const pair=document.getElementById('lcPair')?.value||'EURUSD';
   const balance=parseFloat(document.getElementById('lcBalance')?.value);
   const riskPct=parseFloat(document.getElementById('lcRisk')?.value);
