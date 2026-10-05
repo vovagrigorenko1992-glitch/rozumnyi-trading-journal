@@ -984,38 +984,24 @@ body.trade-editing #add h2::after{content:' · редагування';color:var
 .lang-btn{border:0;background:transparent;color:#7f90a4;font-weight:850;font-size:12px;padding:7px 9px;border-radius:8px;cursor:pointer}
 .lang-btn.active{background:#17382e;color:#5bd69a}
 
-/* v18 — compact desktop header */
-@media (min-width: 900px){
-  header{
-    padding-top:8px!important;
-    padding-bottom:8px!important;
-  }
-  header .header-inner{
-    min-height:0!important;
-  }
+/* v18b — compact CENTRAL navigation horizontally; desktop only */
+@media (min-width: 1000px){
   header nav{
-    padding:5px!important;
-    gap:5px!important;
+    width:auto!important;
+    max-width:none!important;
+    flex:0 1 auto!important;
+    padding:5px 7px!important;
+    gap:3px!important;
   }
   header nav button,
   header nav .nav-btn{
-    min-height:38px!important;
-    padding:8px 14px!important;
-  }
-  header .lang-switch,
-  header .language-switch{
-    padding:3px!important;
-    gap:2px!important;
-  }
-  header .lang-switch button,
-  header .language-switch button{
-    min-height:34px!important;
-    padding:6px 10px!important;
-  }
-  header .auth-actions button,
-  header #logoutBtn{
-    min-height:38px!important;
-    padding:8px 14px!important;
+    min-width:0!important;
+    width:auto!important;
+    padding-left:10px!important;
+    padding-right:10px!important;
+    font-size:13px!important;
+    letter-spacing:-0.15px!important;
+    white-space:nowrap!important;
   }
 }
 
