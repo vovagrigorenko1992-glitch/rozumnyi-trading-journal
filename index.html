@@ -1243,7 +1243,19 @@ const UI_EN={
 '7 днів':'7 days','Усі валюти':'All currencies','Усі важливі':'All impacts','↻ Оновити':'↻ Refresh','ЧАС':'TIME','ВАЛЮТА':'CURRENCY','ВПЛИВ':'IMPACT','ПОДІЯ':'EVENT','Середня':'Medium','Висока':'High','Низька':'Low','Весь день':'All day',
 'Нова угода':'New trade','Редагувати угоду':'Edit trade','Повнота угоди':'Trade completeness','Дата':'Date','Інструмент':'Instrument','Модель входу':'Entry model','Оцінка сетапу':'Setup grade','HTF тренд':'HTF trend','Зняття ліквідності':'Liquidity sweep','Результат':'Result','Ризик %':'Risk %','Ліквідність':'Liquidity','Результат, R':'Result, R','POI (зона інтересу)':'POI (area of interest)','Скрін ДО':'BEFORE screenshot','Скрін ПІСЛЯ':'AFTER screenshot','+ Додати скрін':'+ Add screenshot','Нотатки':'Notes','Зберегти угоду':'Save trade','Зберегти зміни':'Save changes',
 'Імпорт та експорт журналу':'Journal import & export','Експорт журналу':'Export journal','Імпорт журналу':'Import journal',
-'Калькулятор розміру позиції':'Position size calculator','Розрахувати':'Calculate'
+'Калькулятор розміру позиції':'Position size calculator','Розрахувати':'Calculate',
+'трейдинг-журнал':'trading journal',
+'Усі важливі':'All impacts',
+'Finance Calendar':'Finance Calendar',
+'час виходу за Києвом':'release time in Kyiv',
+'угоди →':'trades →',
+'Сильна сесія:':'Strongest session:',
+'Сильніший напрямок:':'Stronger direction:',
+'Придивись до моделі OB':'Review the OB model',
+'Тут зараз найвище середнє:':'Current highest average:',
+'Відстежуй, чи перевага зберігається на більшій вибірці.':'Track whether the edge holds on a larger sample.',
+'Перевір, у якому контексті вона працює найкраще.':'Check the context where it performs best.'
+
 };
 let appLang=localStorage.getItem('tj_language')||'uk';
 const uiOriginal=new WeakMap();
@@ -1253,7 +1265,18 @@ function uiTr(s){
  let m;if((m=s.match(/^Ще (\d+) повних угод$/)))return `${m[1]} complete trades remaining`;
  if((m=s.match(/^(\d+)% шляху пройдено$/)))return `${m[1]}% completed`;
  if((m=s.match(/^(\d+) угод$/)))return `${m[1]} trades`;
- return s.replace(/(\d+)\s+угод\b/g,'$1 trades');
+ return s.replace(/(\d+)\s+угод\b/g,'$1 trades')
+   .replace(/трейдинг-журнал/g,'trading journal')
+   .replace(/час виходу за Києвом/g,'release time in Kyiv')
+   .replace(/угоди\s*→/g,'trades →')
+   .replace(/Сильна сесія:/g,'Strongest session:')
+   .replace(/Сильніший напрямок:/g,'Stronger direction:')
+   .replace(/Придивись до моделі OB/g,'Review the OB model')
+   .replace(/Тут зараз найвище середнє:/g,'Current highest average:')
+   .replace(/Відстежуй, чи перевага зберігається на більшій вибірці\./g,'Track whether the edge holds on a larger sample.')
+   .replace(/Перевір, у якому контексті вона працює найкраще\./g,'Check the context where it performs best.')
+   .replace(/\bСередня\b/g,'Medium').replace(/\bВисока\b/g,'High').replace(/\bНизька\b/g,'Low')
+   .replace(/\bВесь день\b/g,'All day');
 }
 function applyLanguage(root=document.body){
  const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);let n;
@@ -1265,6 +1288,12 @@ function applyLanguage(root=document.body){
   const next=(raw.match(/^\s*/)?.[0]||'')+nextText+(raw.match(/\s*$/)?.[0]||'');
   if(next!==raw)n.nodeValue=next;
  }
+ document.querySelectorAll('select option').forEach(o=>{
+  if(!o.dataset.i18nOriginal)o.dataset.i18nOriginal=o.textContent.trim();
+  const orig=o.dataset.i18nOriginal;
+  const translated=appLang==='en'?uiTr(orig):orig;
+  if(o.textContent!==translated)o.textContent=translated;
+ });
  document.querySelectorAll('.lang-btn').forEach(b=>b.classList.toggle('active',b.dataset.lang===appLang));
  document.documentElement.lang=appLang==='en'?'en':'uk';
 }
@@ -2064,7 +2093,7 @@ document.getElementById('savePreferences')?.addEventListener('click',()=>{
   const msg=document.getElementById('settingsSaved');if(msg){msg.textContent='Збережено ✓';setTimeout(()=>msg.textContent='',1500)}
 });
 var cloudUser=null,cloudTimer=null,cloudBusy=false,cloudReady=false,sb=null;
-init();setTodayDate();loadInstruments();loadEntryModels();applyPreferences(false);initCalendarUI();setTimeout(()=>applyLanguage(document.body),0);setTimeout(()=>applyLanguage(document.body),1200);
+init();setTodayDate();loadInstruments();loadEntryModels();applyPreferences(false);initCalendarUI();setTimeout(()=>applyLanguage(document.body),0);setTimeout(()=>applyLanguage(document.body),500);setTimeout(()=>applyLanguage(document.body),1200);
 // Cloud sync: Supabase + Google OAuth
 const SUPABASE_URL='https://qqshpilcwesnopdchwbn.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY='sb_publishable_ZpvRoNF1dmomlyNYLTN_9g_KoJ1rYlS';
