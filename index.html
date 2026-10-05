@@ -1388,7 +1388,7 @@ function applyLanguage(root=document.body){
 }
 function setLanguage(lang){
  appLang=lang==='en'?'en':'uk';localStorage.setItem('tj_language',appLang);
- render();setTimeout(()=>{applyLanguage(document.body);updateTradeCompletion();renderShotGroup('before');renderShotGroup('after');applyLanguage(document.body)},0);setTimeout(()=>applyLanguage(document.body),800);
+ render();setTimeout(()=>{applyLanguage(document.body);translateCalculatorPage();updateTradeCompletion();renderShotGroup('before');renderShotGroup('after');applyLanguage(document.body)},0);setTimeout(()=>{applyLanguage(document.body);translateCalculatorPage();},800);
 }
 document.querySelectorAll('.lang-btn').forEach(b=>b.addEventListener('click',()=>setLanguage(b.dataset.lang)));
 
@@ -1482,7 +1482,11 @@ function renderMiniCurve(selector,data,unit){
 }
 renderMiniCurve('#equity',series,'R');
 renderMiniCurve('#incomeCurve',incomeSeries,'%');
-renderHundredChallenge();renderAIReview();updateTradeCompletion();renderSettings();$('#breakdown').innerHTML=groupHTML('Сесія','session')+groupHTML('Напрямок','side')+groupHTML('Тип входу','entryType'); renderAdvice(); renderRows(); renderАналітика(); fillSessions()}
+renderHundredChallenge();renderAIReview();updateTradeCompletion();renderSettings();$('#breakdown').innerHTML=groupHTML('Сесія','session')+groupHTML('Напрямок','side')+groupHTML('Тип входу','entryType'); renderAdvice(); renderRows(); renderАналітика(); fillSessions();
+  // Every render rebuilds dynamic UI in Ukrainian source strings.
+  // Re-apply the saved language after the rebuild so F5 keeps EN consistently.
+  if(appLang==='en') setTimeout(()=>{applyLanguage(document.body);translateCalculatorPage();},0);
+}
 function group(key){let m={};trades.forEach(t=>{if(key==='entryType'&&!t[key])return;let k=t[key]||'Unknown';(m[k]??=[]).push(t)});return m}function groupHTML(title,key){let g=group(key),mx=Math.max(1,...Object.values(g).map(a=>a.length));let tones=key==='session'?{'New-York':'tone-blue','London':'tone-violet','Asia':'tone-orange'}:key==='entryType'?{'Market':'tone-green','Limit':'tone-violet'}:{'Long':'tone-green','Short':'tone-orange'};return `<div class='break-section'><div class='break-title'>${appLang==='en'?uiTr(title):title}</div>${Object.entries(g).map(([k,a])=>{let s=stats(a),cls=s.sum>=0?'good':'bad',tone=tones[k]||'tone-blue';return `<div class='break-item'><div class='break-top'><span class='break-name'>${k}</span><span class='break-stats'><span class='stat-chip'>${a.length} ${appLang==='en'?'trades':'угод'}</span><span class='stat-chip'>${s.wr.toFixed(0)}% WR</span><span class='stat-chip ${cls}'>${s.sum>=0?'+':''}${s.sum.toFixed(1)}R</span></span></div><div class='break-bar ${tone}'><i style='width:${a.length/mx*100}%'></i></div></div>`}).join('')}</div>`}
 function parseTradeDate(v){if(!v)return null;let x=String(v).trim().split(/[ ,T]/)[0];if(/^\d{4}-\d{2}-\d{2}$/.test(x)){let [y,m,d]=x.split('-').map(Number);return new Date(y,m-1,d)}if(/^\d{2}\/\d{2}\/\d{4}$/.test(x)){let [d,m,y]=x.split('/').map(Number);return new Date(y,m-1,d)}return null}
 const uaMonths=['Січень','Лютий','Березень','Квітень','Травень','Червень','Липень','Серпень','Вересень','Жовтень','Листопад','Грудень'];
@@ -2304,6 +2308,7 @@ async function loadAccountData(){
   cloudReady=true;
   lastCloudSyncAt=new Date();
   setAuthUI(cloudUser.email||'Синхронізовано','ok');renderSettings();applyPreferences(false);
+  if(appLang==='en') setTimeout(()=>{applyLanguage(document.body);translateCalculatorPage();},0);
 }
 async function clearCurrentAccountCloud(){
   if(!cloudUser||!sb)return;
