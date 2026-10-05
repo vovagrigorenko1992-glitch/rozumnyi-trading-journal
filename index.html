@@ -2294,7 +2294,44 @@ async function handleAuthButton(){
 }
 
 
+
+function translateCalculatorPage(){
+  if(appLang!=='en') return;
+  const root=document.getElementById('calculator');
+  if(!root) return;
+
+  const replacements = new Map([
+    ['Калькулятор лотажу','Lot size calculator'],
+    ['Розрахунок позиції','Position size calculation'],
+    ['Ризик → Stop Loss → потрібний лот','Risk → Stop Loss → required lot size'],
+    ['Валютна пара','Currency pair'],
+    ['Валюта рахунку','Account currency'],
+    ['Розмір рахунку, $','Account balance, $'],
+    ['Ризик, %','Risk, %'],
+    ['Поточна ціна','Current price'],
+    ['Скинути','Reset'],
+    ['Рекомендований розмір позиції','Recommended position size'],
+    ['Ризик грошима','Risk amount'],
+    ['Вартість 1 pip','Value per pip'],
+    ['Ризик','Risk'],
+    ['Для EURUSD та інших пар із USD справа ціна не потрібна.','For EURUSD and other pairs with USD as the quote currency, the current price is not required.'],
+    ['Lot = ризик у $ ÷ (SL у pips × вартість pip для 1 lot)','Lot = risk in $ ÷ (SL in pips × pip value for 1 lot)']
+  ]);
+
+  root.querySelectorAll('h1,h2,h3,label,button,div,span,p,small').forEach(el=>{
+    if(el.children.length) return;
+    const t=(el.textContent||'').trim();
+    if(replacements.has(t)) el.textContent=replacements.get(t);
+  });
+
+  root.querySelectorAll('input').forEach(el=>{
+    if(el.placeholder==='Потрібна для USDJPY/CHF/CAD')
+      el.placeholder='Required for USDJPY/CHF/CAD';
+  });
+}
+
 function calcLotSize(){
+  setTimeout(translateCalculatorPage,0);
   const pair=document.getElementById('lcPair')?.value||'EURUSD';
   const balance=parseFloat(document.getElementById('lcBalance')?.value);
   const riskPct=parseFloat(document.getElementById('lcRisk')?.value);
